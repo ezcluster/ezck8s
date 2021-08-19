@@ -1,0 +1,8 @@
+
+# ------ From kubespray plugin (2/2)
+[ssh_connection]
+pipelining=True
+ssh_args = -o ControlMaster=auto -o ControlPersist=30m -o ConnectionAttempts=100 -o UserKnownHostsFile=/dev/null
+#control_path = ~/.ssh/ansible-%%r@%%h:%%p
+[inventory]
+ignore_patterns = artifacts, credentials

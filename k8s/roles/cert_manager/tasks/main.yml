@@ -1,0 +1,88 @@
+# Copyright (C) 2018 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+
+- name: Install k8s ansible module required package
+  yum: name=python2-openshift state=present
+  
+- name: Copy definition file
+  template:
+    src: cert_manager_{{ cert_manager_version }}.yaml
+    dest: /tmp/cert_manager.yaml  
+
+- name: Install cert_manager
+  k8s:
+    state: present
+    src: "/tmp/cert_manager.yaml"
+  
+- name: Wait for cert-manager running
+  k8s_info:
+    kind: Pod
+    api_version: v1
+    namespace: cert-manager
+    label_selectors:
+    - app=cert-manager
+    field_selectors:
+    - status.phase=Running
+  register: k8s_result
+  retries: 30
+  delay: 3
+  until: k8s_result.resources is defined and k8s_result.resources|length > 0
+  
+- name: Wait for cert-manager-cainjector running
+  k8s_info:
+    kind: Pod
+    api_version: v1
+    namespace: cert-manager
+    label_selectors:
+    - app=cainjector
+    field_selectors:
+    - status.phase=Running
+  register: k8s_result
+  retries: 30
+  delay: 3
+  until: k8s_result.resources is defined and k8s_result.resources|length > 0
+  
+- name: Wait for cert-manager-webhook running
+  k8s_info:
+    kind: Pod
+    api_version: v1
+    namespace: cert-manager
+    label_selectors:
+    - app=webhook
+    field_selectors:
+    - status.phase=Running
+  register: k8s_result
+  retries: 30
+  delay: 3
+  until: k8s_result.resources is defined and k8s_result.resources|length > 0
+
+- name: Pause 30sec for the webhook to be ready
+  pause:
+    seconds: 30  
+  
+- name: Copy cluster_issuers
+  template:
+    src: cluster_issuers.yaml.j2
+    dest: /tmp/cluster_issuers.yaml  
+
+- name: Install cluster_issuers
+  k8s:
+    state: present
+    src: "/tmp/cluster_issuers.yaml"  
+    

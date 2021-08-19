@@ -1,0 +1,4 @@
+
+- name: Handle cert-manager
+  import_playbook: cert_manager.yml
+     

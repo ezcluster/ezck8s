@@ -1,0 +1,89 @@
+
+
+{%% for dep in m.cluster.k8s.helm_deployments %%}
+{%% if not dep.disabled %%}
+
+- hosts: kube_control_plane[0]
+  tags: [ "helm_{{{dep.name}}}", "helm-{{{dep.name}}}" ]
+
+  tasks:
+
+{%% if dep.state != "absent" %%}
+  - name: Create Values file
+    copy:
+      dest: {{{dep._valuesFile_}}}
+      content: |
+        {{{ dep._values_ | to_pretty_yaml | indent(8)  }}}
+{%% endif %%}    
+
+{%% if dep.state == "absent" %%}            
+  - name: Check if already installed
+    shell: sudo su - root -c 'helm status  --namespace {{{ dep.namespace }}} {{{ dep.name }}}' 
+    args:
+      warn: false
+    failed_when: false
+    changed_when: false
+    register: helm_info
+
+  - name: Remove {{{ dep.name }}} helm deployment
+    shell: sudo su - root -c 'helm uninstall --namespace {{{ dep.namespace }}} {{{ dep.name }}}' 
+    args:
+      warn: false
+    register: helm_out
+    when: helm_info.rc == 0
+      
+  # - debug: var=helm_out
+{%% endif %%}    
+
+
+{%% if dep.state == "present" %%}
+  - name: Ensure namespace {{{ dep.namespace }}}
+    k8s:
+      api_version: v1
+      kind: Namespace
+      name: {{{ dep.namespace }}}
+      state: present
+            
+  - name: Check if already installed
+    shell: sudo su - root -c 'helm status  --namespace {{{ dep.namespace }}} {{{ dep.name }}}' 
+    args:
+      warn: false
+    failed_when: false
+    changed_when: false
+    register: helm_info
+
+  #- debug: var=helm_info
+            
+  - name: Install {{{ dep.name }}} helm deployment
+    shell: sudo su - root -c 'helm install  --namespace {{{ dep.namespace }}} {{{ dep._options_ }}} --values {{{ dep._valuesFile_ }}} {{{ dep.name }}} {{{ dep.chart }}}' 
+    args:
+      warn: false
+    register: helm_out
+    when: helm_info.rc != 0
+      
+  #- debug: var=helm_out
+{%% endif %%}    
+
+
+
+{%% if dep.state == "latest" %%}
+  - name: Ensure namespace {{{ dep.namespace }}}
+    k8s:
+      api_version: v1
+      kind: Namespace
+      name: {{{ dep.namespace }}}
+      state: present
+            
+  - name: Install or upgrade {{{ dep.name }}} helm deployment
+    shell: sudo su - root -c 'helm upgrade --install  --namespace {{{ dep.namespace }}} {{{ dep._options_ }}} --values {{{ dep._valuesFile_ }}} {{{ dep.name }}} {{{ dep.chart }}}' 
+    args:
+      warn: false
+    register: helm_out
+      
+  #- debug: var=helm_out
+{%% endif %%}    
+
+
+
+{%% endif %%}
+{%% endfor %%}

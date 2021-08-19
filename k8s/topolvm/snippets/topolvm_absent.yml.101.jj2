@@ -1,0 +1,16 @@
+
+
+- hosts: kube_control_plane
+  tags: [ "topolvm", "topolvm_master" ]
+  vars:
+    topolvm_state: absent  
+    topolvm_version: {{{ m.data.repositories.topolvm.version }}}      
+  roles:
+  - topolvm_master  
+  
+
+- hosts: _topolvm_
+  tags: [ "topolvm", "topolvm_lvmd" ]
+  roles:
+  - topolvm_lvmd_absent
+  

@@ -1,0 +1,113 @@
+# Copyright (C) 2018 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+
+- name: Install k8s ansible module required package
+  yum: 
+    name: python2-openshift 
+    state: present
+
+- name: Ensure working temp folder
+  file:
+    state: directory
+    path: "{{ingress_nginx_tmp_folder}}"
+
+- block:
+  - name: Generate the psp manifest
+    template:
+      src: psp.yaml.j2
+      dest: "{{ingress_nginx_tmp_folder}}/psp.yaml"
+    
+  - name: Apply the psp manifest
+    k8s:
+      state: present
+      src:  "{{ingress_nginx_tmp_folder}}/psp.yaml"
+  when: ingress_nginx_set_psp    
+
+- name: "Copy ingress_nginx deployment manifest from local files"
+  copy:
+    src: "{{ingress_nginx_manifest}}"
+    dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+  changed_when: false
+  when: ingress_nginx_manifest is not match("https://.*")
+
+- name: "Copy ingress_nginx deployment manifest from remote url"
+  get_url:
+    url: "{{ingress_nginx_manifest}}"
+    dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+  changed_when: false
+  when: ingress_nginx_manifest is match("https://.*")
+
+- name: "Add command line arguments"
+  lineinfile:
+    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+    regexp: "^.*{{item}}.*"
+    line: "            - {{item}}"
+    insertafter: '^.*- /nginx-ingress-controller'
+  changed_when: false
+  with_items: "{{ingress_nginx_command_line_arguments}}"
+              
+- name: Install ingress_nginx
+  k8s:
+    state: present
+    src: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+
+- block:
+  # -------------------------------------- LoadBalancer as upfront
+  - name: Generate the LoadBalancer manifest
+    template:
+      src: load_balancer.yaml.j2
+      dest: "{{ingress_nginx_tmp_folder}}/load_balancer.yaml"
+    
+  - name: Apply the LoadBalancer manifest
+    k8s:
+      state: present
+      src:  "{{ingress_nginx_tmp_folder}}/load_balancer.yaml"
+  when: ingress_nginx_external_ip is defined
+
+- block:
+  # -------------------------------------- NodePort as upfront
+  - name: Generate the NodePort manifest
+    template:
+      src: node_port.yaml.j2
+      dest: "{{ingress_nginx_tmp_folder}}/node_port.yaml"
+    
+  - name: Apply the NodePort manifest
+    k8s:
+      state: present
+      src:  "{{ingress_nginx_tmp_folder}}/node_port.yaml"
+  when: (ingress_nginx_http_node_port is defined) or (ingress_nginx_https_node_port is defined)
+
+- block:    
+  # ------------------------------------- Dashboard manifest
+  - name: Generate the dashboard manifest
+    template:
+      src: dashboard.yaml.j2
+      dest: "{{ingress_nginx_tmp_folder}}/dashboard.yaml"
+  
+  # We must retry, waiting for the webhook to be ready
+  - name: Apply the dashboard manifest (May wait for the nginx Webhook ready)
+    k8s:
+      state: present
+      src:  "{{ingress_nginx_tmp_folder}}/dashboard.yaml"
+    retries: 100   # NB: May take long time to load controller image
+    delay: 5
+    register: result
+    until: not result.failed      
+  #- debug: var=result
+  when: ingress_nginx_dashboard_host is defined     

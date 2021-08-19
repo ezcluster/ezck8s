@@ -1,0 +1,13 @@
+
+echo $'Node{%% for dc in m.cluster.k8s.topolvm.device_classes %%}\t{{{dc.name}}}{%% endfor %%}'
+     
+JSONPATH=""
+JSONPATH="${JSONPATH}{range .items[*]}"
+JSONPATH="${JSONPATH}{.metadata.name}"
+{%% for dc in m.cluster.k8s.topolvm.device_classes %%}
+JSONPATH="${JSONPATH}{'\t'}{.metadata.annotations.capacity\.topolvm\.cybozu\.com/{{{dc.name}}} }"
+{%% endfor %%}
+JSONPATH="${JSONPATH}{'\n'}{end}"
+#echo $JSONPATH
+
+kubectl get nodes -o=jsonpath="${JSONPATH}" 
