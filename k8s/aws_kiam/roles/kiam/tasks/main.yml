@@ -1,0 +1,63 @@
+# Copyright (C) 2021 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+# Install https://github.com/kubernetes-sigs/sig-storage-local-static-provisioner
+
+- name: Install k8s ansible module required package
+  yum: name=python2-openshift state=present
+
+- name: "Create {{kiam_namespace}} namespace"
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{kiam_namespace}}"
+
+- name: "Relax PSP on {{kiam_namespace}} namespace"
+  k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: psp:privileged:kiam-system
+        namespace: kiam-system
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: psp:privileged
+      subjects:
+      - kind: Group
+        # All authenticated users are allowed to use this.
+        name: system:authenticated
+        apiGroup: rbac.authorization.k8s.io
+
+- name: Copy helm chart in working folder
+  copy:
+    src: "{{kiam_version}}/"
+    dest: "{{kiam_working_folder}}/chart"
+  notify:
+  - deploy_chart
+
+- name: Copy our values
+  template:
+    src: myvalues.yaml.j2
+    dest: "{{kiam_working_folder}}/myvalues.yaml"
+  notify:
+  - deploy_chart

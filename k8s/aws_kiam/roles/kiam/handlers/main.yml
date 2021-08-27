@@ -1,0 +1,6 @@
+---
+- name: Generate kiam chart
+  shell: su - root -c 'helm -n {{kiam_namespace}} install --values {{kiam_working_folder}}/myvalues.yaml kiam {{kiam_working_folder}}/chart'
+  args: 
+    warn: no
+  listen: deploy_chart

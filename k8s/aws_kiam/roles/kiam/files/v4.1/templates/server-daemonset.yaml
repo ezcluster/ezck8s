@@ -1,0 +1,190 @@
+{{- if and .Values.server.enabled ( eq .Values.server.deployment.enabled false) -}}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app: {{ template "kiam.name" . }}
+    chart: {{ template "kiam.chart" . }}
+    component: "{{ .Values.server.name }}"
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  name: {{ template "kiam.fullname" . }}-server
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "kiam.name" . }}
+      component: "{{ .Values.server.name }}"
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      {{- if .Values.server.podAnnotations }}
+      annotations:
+{{ toYaml .Values.server.podAnnotations | indent 8 }}
+      {{- end }}
+      labels:
+        app: {{ template "kiam.name" . }}
+        component: "{{ .Values.server.name }}"
+        release: {{ .Release.Name }}
+      {{- if .Values.server.podLabels }}
+{{ toYaml .Values.server.podLabels | indent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ template "kiam.serviceAccountName.server" . }}
+      hostNetwork: {{ .Values.server.useHostNetwork }}
+    {{- if .Values.server.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.server.nodeSelector | indent 8 }}
+    {{- end }}
+      tolerations:
+{{ toYaml .Values.server.tolerations | indent 8 }}
+      {{- if .Values.server.affinity }}
+      affinity:
+{{ toYaml .Values.server.affinity | indent 10 }}
+      {{- end }}
+      volumes:
+        - name: tls
+          secret:
+            {{- if .Values.server.tlsSecret }}
+            secretName: {{ .Values.server.tlsSecret }}
+            {{else}}
+            secretName: {{ template "kiam.fullname" . }}-server
+            {{- end }}
+        {{- if .Values.server.sslCertHostPath }}
+        - name: ssl-certs
+          hostPath:
+            path: {{ .Values.server.sslCertHostPath }}
+        {{- end }}
+      {{- range .Values.server.extraHostPathMounts }}
+        - name: {{ .name }}
+          hostPath:
+            path: {{ .hostPath }}
+      {{- end }}
+      {{- if .Values.server.priorityClassName }}
+      priorityClassName: {{ .Values.server.priorityClassName | quote }}
+      {{- end }}
+      {{- if .Values.server.initContainers }}
+      initContainers:
+{{ toYaml .Values.server.initContainers | indent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ template "kiam.name" . }}-{{ .Values.server.name }}
+          image: "{{ .Values.server.image.repository }}:{{ .Values.server.image.tag }}"
+          imagePullPolicy: {{ .Values.server.image.pullPolicy }}
+          command:
+            - /kiam
+            - server
+          args:
+            {{- if .Values.server.log.jsonOutput }}
+            - --json-log
+            {{- end }}
+            - --level={{ .Values.server.log.level }}
+            - --bind=0.0.0.0:{{ .Values.server.service.targetPort }}
+            - --cert=/etc/kiam/tls/{{ .Values.server.tlsCerts.certFileName }}
+            - --key=/etc/kiam/tls/{{ .Values.server.tlsCerts.keyFileName }}
+            - --ca=/etc/kiam/tls/{{ .Values.server.tlsCerts.caFileName }}
+            {{- if .Values.server.roleBaseArn }}
+            - --role-base-arn={{ .Values.server.roleBaseArn }}
+            {{- else }}
+            - --role-base-arn-autodetect
+            {{- end }}
+            {{- if .Values.server.assumeRoleArn }}
+            - --assume-role-arn={{ .Values.server.assumeRoleArn }}
+            {{- end }}
+            - --session-duration={{ .Values.server.sessionDuration }}
+            - --sync={{ .Values.server.cache.syncInterval }}
+            {{- if .Values.server.prometheus.scrape }}
+            - --prometheus-listen-addr=0.0.0.0:{{ .Values.server.prometheus.port }}
+            - --prometheus-sync-interval={{ .Values.server.prometheus.syncInterval }}
+            {{- end }}
+            {{- if .Values.server.keepaliveParams.time }}
+            - --grpc-keepalive-time-duration={{ .Values.server.keepaliveParams.time }}
+            {{- end }}
+            {{- if .Values.server.keepaliveParams.timeout }}
+            - --grpc-keepalive-timeout-duration={{ .Values.server.keepaliveParams.timeout }}
+            {{- end }}
+            {{- if .Values.server.keepaliveParams.maxConnectionIdle }}
+            - --grpc-max-connection-idle-duration={{ .Values.server.keepaliveParams.maxConnectionIdle }}
+            {{- end }}
+            {{- if .Values.server.keepaliveParams.maxConnectionAge }}
+            - --grpc-max-connection-age-duration={{ .Values.server.keepaliveParams.maxConnectionAge }}
+            {{- end }}
+            {{- if .Values.server.keepaliveParams.maxConnectionAgeGrace }}
+            - --grpc-max-connection-age-grace-duration={{ .Values.server.keepaliveParams.maxConnectionAgeGrace }}
+            {{- end }}
+            {{- if .Values.server.disableStrictNamespaceRegexp }}
+            - --disable-strict-namespace-regexp
+            {{- end }}
+          {{- range $key, $value := .Values.server.extraArgs }}
+            {{- if $value }}
+            - --{{ $key }}={{ $value }}
+            {{- else }}
+            - --{{ $key }}
+            {{- end }}
+          {{- end }}
+          env:
+          {{- if .Values.server.extraEnv }}
+{{ toYaml .Values.server.extraEnv | indent 12 }}
+        {{- end }}
+          {{- if .Values.server.seLinuxOptions }}
+          securityContext:
+            seLinuxOptions:
+{{ toYaml .Values.server.seLinuxOptions | indent 14 }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /etc/kiam/tls
+              name: tls
+            {{- if .Values.server.sslCertHostPath }}
+            - mountPath: /etc/ssl/certs
+              name: ssl-certs
+              readOnly: true
+            {{- end }}
+          {{- range .Values.server.extraHostPathMounts }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              readOnly: {{ .readOnly }}
+          {{- end }}
+          livenessProbe:
+            exec:
+              command:
+                - /kiam
+                - health
+                - --cert=/etc/kiam/tls/{{ .Values.server.tlsCerts.certFileName }}
+                - --key=/etc/kiam/tls/{{ .Values.server.tlsCerts.keyFileName }}
+                - --ca=/etc/kiam/tls/{{ .Values.server.tlsCerts.caFileName }}
+                - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
+                - --server-address-refresh=2s
+                - --timeout=5s
+                - --gateway-timeout-creation={{ .Values.server.gatewayTimeoutCreation }}
+            initialDelaySeconds: {{ .Values.server.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.server.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.server.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.server.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.server.livenessProbe.failureThreshold }}
+          readinessProbe:
+            exec:
+              command:
+                - /kiam
+                - health
+                - --cert=/etc/kiam/tls/{{ .Values.server.tlsCerts.certFileName }}
+                - --key=/etc/kiam/tls/{{ .Values.server.tlsCerts.keyFileName }}
+                - --ca=/etc/kiam/tls/{{ .Values.server.tlsCerts.caFileName }}
+                - --server-address={{ .Values.server.probes.serverAddress }}:{{ .Values.server.service.targetPort }}
+                - --server-address-refresh=2s
+                - --timeout=5s
+                - --gateway-timeout-creation={{ .Values.server.gatewayTimeoutCreation }}
+            initialDelaySeconds: {{ .Values.server.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.server.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.server.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.server.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.server.readinessProbe.failureThreshold }}
+        {{- if .Values.server.resources }}
+          resources:
+{{ toYaml .Values.server.resources | indent 12 }}
+        {{- end }}
+        {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+  updateStrategy:
+    type: {{ .Values.server.updateStrategy }}
+{{- end }}

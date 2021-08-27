@@ -1,0 +1,37 @@
+# KIAM standard pattern, with server on master nodes and agent on all others
+
+agent:
+#  seLinuxOptions:
+#    user: system_u
+#    role: system_r
+#    type: spc_t
+#    level: s0
+  # Always set the iptables rule.
+  host:
+    iptables: true
+  allowRouteRegexp: '.*'
+
+
+server:
+  deployment:
+    enabled: true
+    replicas: {{ kiam_server_replicas }}
+  nodeSelector: {}
+  # Allow server to run on control plane nodes
+  tolerations:
+    - effect: NoSchedule
+      key: node-role.kubernetes.io/master
+      operator: Exists
+  # Force node to run on control plane nodes
+  affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+        - matchExpressions:
+          - key: node-role.kubernetes.io/control-plane
+            operator: In
+            values:
+            - ""
+
+
+

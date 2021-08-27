@@ -1,0 +1,10 @@
+
+- hosts: kube_control_plane[0]
+  tags: [ "kiam" ]
+  vars:
+    kiam_version: "{{{m.cluster.k8s.kiam.version}}}"
+    kiam_server_replicas: {{{ m.cluster.k8s.kiam.server_replicas }}}
+  roles:
+  - { role: "kiam" }
+
+
