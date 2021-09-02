@@ -19,7 +19,7 @@
 
 # argocd_load_balancer_ip: 192.168.33.23
 
-# argocd_ingress_nginx_host: argocd.kspray1
+# argocd_ingress_nginx_host: argocd.kspray11
      
 argocd_manifest: https://raw.githubusercontent.com/argoproj/argo-cd/v{{argocd_version}}/manifests/install.yaml    
     

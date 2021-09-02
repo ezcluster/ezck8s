@@ -22,7 +22,7 @@
 
 #ingress_nginx_enable_ssl_passthrough: True
 
-#ingress_nginx_dashboard_host: dashboard.kspray1
+#ingress_nginx_dashboard_host: dashboard.kspray11
 
 ingress_nginx_command_line_arguments: []
     
