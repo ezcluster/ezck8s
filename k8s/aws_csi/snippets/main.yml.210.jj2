@@ -1,0 +1,62 @@
+
+
+- hosts: kube_control_plane[0]
+  tags: [ "aws_csi" ]
+  tasks:
+  - name: Install k8s ansible module required package
+    yum: name=python2-openshift state=present
+{%% if m.cluster.k8s.aws_csi.controller_on_control_plane %%}
+  - name: Patch the ebs-csi-controller deployment to move it on control plane (Required if kiam is installed)
+    k8s:
+      state: present
+      merge_type: strategic-merge
+      resource_definition:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ebs-csi-controller
+          namespace: kube-system
+        spec:
+          template:
+            spec:
+#              nodeSelector:
+#                node-role.kubernetes.io/control-plane: ""
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: node-role.kubernetes.io/control-plane
+                        operator: In
+                        values:
+                        - ""
+              tolerations:
+                - effect: NoSchedule
+                  key: node-role.kubernetes.io/master
+                  operator: Exists
+{%% else %%}
+  # As we are not able to delete the nodeAffinity part, we just reverse the predicat
+  - name: Unppatch the ebs-csi-controller deployment, back to normal behavior
+    k8s:
+      state: present
+      merge_type: strategic-merge
+      resource_definition:
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ebs-csi-controller
+          namespace: kube-system
+        spec:
+          template:
+            spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: node-role.kubernetes.io/control-plane
+                        operator: NotIn
+                        values:
+                        - ""
+              tolerations: []
+{%% endif %%}

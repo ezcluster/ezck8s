@@ -1,0 +1,47 @@
+# Copyright (C) 2018 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+type: map
+mapping:
+  "k8s":
+    type: map
+    required: true
+    mapping:
+      "aws_csi":
+        type: map
+        required: false
+        mapping:
+          disabled: { type: bool, required: false }    # Default to False
+          volume_scheduling: { type: bool, required: false }    # Default to true
+          volume_snapshot: { type: bool, required: false }    # Default to false
+          volume_resizing: { type: bool, required: false }    # Default to false
+          controller_replicas: { type: int, required: false }    # Default to 1
+          plugin_image_tag: { type: str, required: false }    # Default to "latest"
+          controller_on_control_plane: { type: bool, required: false }    # Default to true
+        
+  "roles": 
+    type: seq
+    required: true
+    sequence:
+    - type: map
+      mapping:
+        "aws":
+          type: map
+          required: true
+          mapping:
+            "ebs_csi_enabled": { type: bool, required: false }  # Default to false          
