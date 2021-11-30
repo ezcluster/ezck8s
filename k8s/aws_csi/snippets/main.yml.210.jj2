@@ -5,6 +5,22 @@
   tasks:
   - name: Install k8s ansible module required package
     yum: name=python2-openshift state=present
+  - name: Create another storageclass for encrypted EBS (May be required by some authority)
+    k8s:
+      state: present
+      definition:
+        apiVersion: storage.k8s.io/v1
+        kind: StorageClass
+        metadata:
+          annotations:
+          name: ebs-sc-encrypted
+        parameters:
+          csi.storage.k8s.io/fstype: xfs
+          type: gp2
+          encrypted: "true"
+        provisioner: ebs.csi.aws.com
+        reclaimPolicy: Delete
+        volumeBindingMode: WaitForFirstConsumer
 {%% if m.cluster.k8s.aws_csi.controller_on_control_plane %%}
   - name: Patch the ebs-csi-controller deployment to move it on control plane (Required if kiam is installed)
     k8s:
