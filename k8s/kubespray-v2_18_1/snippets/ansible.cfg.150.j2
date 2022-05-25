@@ -1,0 +1,15 @@
+
+# ----- From kubespray plugin (1/2)
+gathering = smart
+fact_caching = jsonfile
+fact_caching_connection = /tmp
+#stdout_callback = skippy
+#library = ./library
+library = {{ m.data.helpers.kubespray.folder }}/library
+callback_whitelist = profile_tasks
+#roles_path = roles:$VIRTUAL_ENV/usr/local/share/kubespray/roles:$VIRTUAL_ENV/usr/local/share/ansible/roles:/usr/share/kubespray/roles
+#roles_path = /Users/sa/dev/g1/scratch/kubespray/roles
+deprecation_warnings=False
+inventory_ignore_extensions = ~, .orig, .bak, .ini, .cfg, .retry, .pyc, .pyo, .creds
+strategy_plugins = plugins/mitogen/ansible_mitogen/plugins/strategy
+force_valid_group_names = never
