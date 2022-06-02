@@ -1,11 +1,10 @@
 ---
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: argocd-server-ingress
   namespace: argocd
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-passthrough: "true"
 {% if argocd_cluster_issuer is defined %}
@@ -13,13 +12,18 @@ metadata:
     kubernetes.io/tls-acme: "true"
 {% endif %}
 spec:
+  ingressClassName: nginx
   rules:
   - host: {{argocd_ingress_nginx_host}}
     http:
       paths:
-      - backend:
-          serviceName: argocd-server
-          servicePort: https
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: argocd-server
+            port:
+              name: https
 {% if argocd_cluster_issuer is defined %}
   tls:
   - hosts:

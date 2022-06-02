@@ -16,11 +16,20 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 
-
-- name: Install k8s ansible module required package
-  yum: 
-    name: python2-openshift 
-    state: present
+- name: Install k8s ansible module required package (Redhat)
+  yum: name=python2-openshift state=present
+  when: ansible_os_family == "RedHat"
+- name: Install k8s ansible module required package (Debian)
+  block:
+    - apt:
+        name: python3-pip
+        state: present
+    - pip:
+        name:
+          - openshift
+          - pyyaml
+          - kubernetes>=23.6.0
+  when: ansible_os_family == "Debian"
 
 - name: Create argocd namespace
   k8s:

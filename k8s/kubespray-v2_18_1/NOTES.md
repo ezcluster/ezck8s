@@ -16,3 +16,18 @@ For example, naming a cluster cluster1.infra1 while node will be named nX.cluste
 This will have for consequence a pod will not be able to access services using external name (As they will not resolve).
 
 
+## PSP alternatives
+
+https://loft.sh/blog/kubernetes-policy-enforcement-opa-vs-jspolicy/
+https://www.kubermatic.com/resources/goodbye-pod-security-policy-hello-stronger-alternatives/
+
+https://www.jspolicy.com/docs/quickstart
+https://kyverno.io/docs/introduction/
+https://github.com/cruise-automation/k-rail
+https://www.openpolicyagent.org/
+
+
+## Other stuff
+
+https://www.vcluster.com/
+
