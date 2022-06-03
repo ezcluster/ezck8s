@@ -56,6 +56,24 @@
     src: "/tmp/argocd.yaml"
     namespace: argocd
 
+- name: Patch for granting root access to argocd-applicationset-controller (To review)
+  k8s:
+    state: present
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: RoleBinding
+      metadata:
+        name: psp:privileged:pspfree
+        namespace: argocd
+      roleRef:
+        apiGroup: rbac.authorization.k8s.io
+        kind: ClusterRole
+        name: psp:privileged
+      subjects:
+        - kind: ServiceAccount
+          name: argocd-applicationset-controller
+          namespace: argocd
+
 - block:
   - name: Generate the LoadBalancer manifest
     template:
