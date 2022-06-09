@@ -14,9 +14,11 @@
   vars:
     topolvm_state: present
     topolvm_version: {{{ m.data.repositories.topolvm.version }}}
+{%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
+    topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
+{%% endif %%}
     topolvm_device_classes: 
-{{{m.cluster.k8s.topolvm.device_classes|to_pretty_yaml|indent(4, first=True) }}}  
-      
+{{{m.cluster.k8s.topolvm.device_classes|to_pretty_yaml|indent(4, first=True) }}}
   roles:
   - topolvm_master  
   

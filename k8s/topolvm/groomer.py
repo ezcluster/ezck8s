@@ -108,6 +108,8 @@ def groom(_plugin, model):
                         vg = volumeGroupByName[vgName]
                         vg[PHYSICAL_VOLUMES].append("/dev/" + disk[DEVICE])
                         vg[SIZE] += disk[SIZE]
+            # Convert to sorted list, otherwise, we have different order on each run (Breaking ansible idempotency)
+            deviceClassNames = sorted(deviceClassNames)
             if len(deviceClassNames) > 0:
                 devicesClasses = []
                 for dcName in deviceClassNames:

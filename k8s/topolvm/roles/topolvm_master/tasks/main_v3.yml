@@ -1,0 +1,163 @@
+# Copyright (C) 2022 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+- name: Install k8s ansible module required package (Redhat)
+  yum: name=python2-openshift state=present
+  when: ansible_os_family == "RedHat"
+- name: Install k8s ansible module required package (Debian)
+  block:
+    - apt:
+        name: python3-pip
+        state: present
+    - pip:
+        name:
+          - openshift
+          - pyyaml
+          - kubernetes>=23.6.0
+  when: ansible_os_family == "Debian"
+
+# ------------------------------------------------------ Preparation
+
+- name: Protect system namespaces from TopoLVM webhook
+  shell: "{{topolvm_kubectl}} label --overwrite ns kube-system topolvm.cybozu.com/webhook=ignore"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not labeled') == -1
+  when: topolvm_state == 'present'
+
+- name: Unprotect system namespaces from TopoLVM webhook
+  shell: "{{topolvm_kubectl}} label --overwrite ns kube-system topolvm.cybozu.com/webhook-"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not found') == -1
+  when: topolvm_state == 'absent'
+
+
+- name: Add a label on topolvm nodes to select them for daemonset
+  shell: "{{topolvm_kubectl}} label nodes {{item}} --overwrite topology.topolvm.cybozu.com=true"
+  with_items: "{{groups['_topolvm_']}}"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not labeled') == -1
+  when: topolvm_state == 'present'
+
+- name: Remove label on topolvm nodes to select them for daemonset
+  shell: "{{topolvm_kubectl}} label nodes {{item}} --overwrite topology.topolvm.cybozu.com-"
+  with_items: "{{groups['_topolvm_']}}"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not found') == -1
+  when: topolvm_state == 'absent'
+
+# ----------------------------------------- Deployment
+
+- name: Create topolvm namespace
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: topolvm-system
+        labels:
+          topolvm.cybozu.com/webhook: ignore
+  when: topolvm_state == 'present'
+
+- name: Setup value file
+  template:
+    src: "v{{ topolvm_version}}/values.yaml.j2"
+    dest: /tmp/topolvm_values.yaml
+  run_once: true
+  when: topolvm_state == 'present'
+
+- name: Deploy topolvm helm chart
+  kubernetes.core.helm:
+    release_state: "{{topolvm_state}}"
+    release_name: topolvm
+    release_namespace: topolvm-system
+    create_namespace: false
+    chart_ref: "{{ topolvm_helm_chart_url }}"
+    values_files:
+      - /tmp/topolvm_values.yaml
+  run_once: true
+
+# ------------------------------------------------ Schedueler setup
+
+- name: Ensure scheduler folder
+  file:
+    state: directory
+    path: /etc/kubernetes/scheduler
+    mode: 0755
+    owner: root
+    group: root
+  when: topolvm_state == 'present'
+
+
+- name: Copy scheduler extension configuration file
+  template:
+    src: "v{{ topolvm_version}}/scheduler-config.yaml.j2"
+    dest: "/etc/kubernetes/scheduler/scheduler-config.yaml"
+  when: topolvm_state == 'present'
+
+
+- name: Configure kube-scheduler (1/3)
+  lineinfile:
+    state: "{{topolvm_state}}"
+    path: /etc/kubernetes/manifests/kube-scheduler.yaml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: '^.*volumes:'
+  with_items:
+  - { line: '  - { hostPath: { path: /etc/kubernetes/scheduler, type: Directory }, name: topolvm-config }', regexp: '^.*path: +/etc/kubernetes/scheduler\.yaml' }
+
+- name: Configure kube-scheduler (2/3)
+  lineinfile:
+    state: "{{topolvm_state}}"
+    path: /etc/kubernetes/manifests/kube-scheduler.yaml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: '^.*volumeMounts:'
+  with_items:
+  - { line: '    - { mountPath: /var/lib/scheduler, name: topolvm-config, readOnly: true }', regexp: '^.*mountPath: +/var/lib/scheduler/scheduler-config\.yaml' }
+
+- name: Configure kube-scheduler (3/3)
+  lineinfile:
+    state: "{{topolvm_state}}"
+    path: /etc/kubernetes/manifests/kube-scheduler.yaml
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    insertafter: '^.*leader-elect'
+  with_items:
+  - { line: '    - --config=/var/lib/scheduler/scheduler-config.yaml', regexp: '^.*config=/var/lib/scheduler/scheduler-config\.yaml' }
+
+# ------------------------------------- Cleanup
+
+- name: Remove scheduler folder
+  file:
+    state: "{{topolvm_state}}"
+    path: /etc/kubernetes/scheduler
+  when: topolvm_state == 'absent'
+
+- name: Remove topolvm namespace
+  k8s:
+    state: absent
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: topolvm-system
+  when: topolvm_state == 'absent'

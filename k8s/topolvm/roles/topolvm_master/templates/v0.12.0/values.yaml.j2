@@ -1,0 +1,26 @@
+
+
+lvmd:
+  # Will use lvmd in daemon (service) mode
+  managed: false
+
+scheduler:
+  enabled: true
+  type: daemonset
+
+node:
+  nodeSelector:
+    topology.topolvm.cybozu.com: "true"
+
+storageClasses:
+{% for dc in topolvm_device_classes %}
+  - name: {{ dc.storage_class }}
+    storageClass:
+        fsType: {{ dc.fstype }}
+        isDefaultClass: false
+        volumeBindingMode: WaitForFirstConsumer
+        allowVolumeExpansion: true
+        additionalParameters:
+          topolvm.cybozu.com/device-class: {{ dc.name }}
+{% endfor %}
+

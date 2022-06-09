@@ -17,7 +17,7 @@
 
 
 - name: Install required LMV packages
-  yum: pkg=lvm2 state=present
+  package: name=lvm2 state=present
 
 - name: Create volume groups
   lvg:
