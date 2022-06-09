@@ -42,6 +42,7 @@ DEVICE = "device"
 NODE_BY_NAME = "nodeByName"
 NODES = "nodes"
 ALLOW_VOLUME_EXPANSION = "allow_volume_expansion"
+CONTROLLER_REPLICA_COUNT="controller_replica_count"
 
 """
 In model[DATA][K8S][TOPOLVM]:
@@ -74,6 +75,7 @@ volumeGroupsByNode:
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][TOPOLVM], DISABLED, False)
+    setDefaultInMap(model[CLUSTER][K8S][TOPOLVM], CONTROLLER_REPLICA_COUNT, 2)
     setDefaultInMap(model[DATA], K8S, {})
     setDefaultInMap(model[DATA][K8S], TOPOLVM, {})
     if model[CLUSTER][K8S][TOPOLVM][DISABLED]:

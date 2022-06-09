@@ -14,6 +14,7 @@
   vars:
     topolvm_state: present
     topolvm_version: {{{ m.data.repositories.topolvm.version }}}
+    topolvm_controller_replica_count: {{{ m.cluster.k8s.topolvm.controller_replica_count }}}
 {%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
     topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
 {%% endif %%}

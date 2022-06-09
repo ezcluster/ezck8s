@@ -4,6 +4,9 @@ lvmd:
   # Will use lvmd in daemon (service) mode
   managed: false
 
+controller:
+  replicaCount: {{ topolvm_controller_replica_count }}
+
 scheduler:
   enabled: true
   type: daemonset

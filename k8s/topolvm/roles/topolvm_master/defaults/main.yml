@@ -22,6 +22,8 @@ topolvm_kubectl: /usr/local/bin/kubectl
 # Will allow removal
 topolvm_state: present
 
+topolvm_controller_replica_count: 2
+
 #topolvm_version: 0.5.1
 
 #topolvm_device_classes: 

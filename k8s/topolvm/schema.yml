@@ -28,6 +28,7 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
+          "controller_replica_count": { type: int, required: false } # Default to 2
           "device_classes": 
             type: seq
             required: true
