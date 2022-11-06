@@ -55,9 +55,12 @@
           state: present
       - pip:
           name:
-            - openshift
-            - pyyaml
-            - kubernetes>=23.6.0
+            - openshift==0.13.1
+            - pyyaml==5.3.1
+            - kubernetes==24.2.0
+           # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
+           # For example, kubernetes==25.3.0 will fail for next step in such context:
+           # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
     when: ansible_os_family == "Debian"
 {%%- for role in m.cluster.roles %%}
 {%%- if role.k8s is defined and (role.k8s.node_labels is defined or role.k8s.node_taints is defined) %%}    
