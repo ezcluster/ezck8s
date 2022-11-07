@@ -9,7 +9,7 @@
   - topolvm_lvmd
 
 
-- hosts: kube_control_plane
+- hosts: kube_control_plane[0]
   tags: [ "topolvm", "topolvm_master" ]
   vars:
     topolvm_state: present
@@ -23,4 +23,12 @@
   roles:
   - topolvm_master  
   
-   
+
+- hosts: kube_control_plane
+  tags: [ "topolvm", "topolvm_master" ]
+  vars:
+    topolvm_state: present
+    topolvm_version: {{{ m.data.repositories.topolvm.version }}}
+  roles:
+  - topolvm_scheduler
+

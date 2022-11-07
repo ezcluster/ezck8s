@@ -108,7 +108,10 @@ def groom(_plugin, model):
                         vgName = dc[VOLUME_GROUP]
                         setDefaultInMap(volumeGroupByName, vgName, {NAME: vgName, PHYSICAL_VOLUMES: [], SIZE: 0})
                         vg = volumeGroupByName[vgName]
-                        vg[PHYSICAL_VOLUMES].append("/dev/" + disk[DEVICE])
+                        if disk[DEVICE].startswith("/dev"):
+                            vg[PHYSICAL_VOLUMES].append(disk[DEVICE])
+                        else:
+                            vg[PHYSICAL_VOLUMES].append("/dev/" + disk[DEVICE])
                         vg[SIZE] += disk[SIZE]
             # Convert to sorted list, otherwise, we have different order on each run (Breaking ansible idempotency)
             deviceClassNames = sorted(deviceClassNames)

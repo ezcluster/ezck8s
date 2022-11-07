@@ -15,20 +15,26 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
-- name: Install k8s ansible module required package (Redhat)
-  yum: name=python2-openshift state=present
-  when: ansible_os_family == "RedHat"
-- name: Install k8s ansible module required package (Debian)
-  block:
-    - apt:
-        name: python3-pip
-        state: present
-    - pip:
-        name:
-          - openshift
-          - pyyaml
-          - kubernetes>=23.6.0
-  when: ansible_os_family == "Debian"
+
+# The following should have already be installed by the main.yml of kubespray plugin
+
+#- name: Install k8s ansible module required package (Redhat)
+#  yum: name=python2-openshift state=present
+#  when: ansible_os_family == "RedHat"
+#- name: Install k8s ansible module required package (Debian)
+#  block:
+#    - apt:
+#        name: python3-pip
+#        state: present
+#    - pip:
+#        name:
+#          - openshift==0.13.1
+#          - pyyaml==5.3.1
+#          - kubernetes==24.2.0
+#         # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
+#         # For example, kubernetes==25.3.0 will fail for next step in such context:
+#         # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
+#  when: ansible_os_family == "Debian"
 
 # ------------------------------------------------------ Preparation
 
@@ -95,62 +101,7 @@
       - /tmp/topolvm_values.yaml
   run_once: true
 
-# ------------------------------------------------ Schedueler setup
-
-- name: Ensure scheduler folder
-  file:
-    state: directory
-    path: /etc/kubernetes/scheduler
-    mode: 0755
-    owner: root
-    group: root
-  when: topolvm_state == 'present'
-
-
-- name: Copy scheduler extension configuration file
-  template:
-    src: "v{{ topolvm_version}}/scheduler-config.yaml.j2"
-    dest: "/etc/kubernetes/scheduler/scheduler-config.yaml"
-  when: topolvm_state == 'present'
-
-
-- name: Configure kube-scheduler (1/3)
-  lineinfile:
-    state: "{{topolvm_state}}"
-    path: /etc/kubernetes/manifests/kube-scheduler.yaml
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    insertafter: '^.*volumes:'
-  with_items:
-  - { line: '  - { hostPath: { path: /etc/kubernetes/scheduler, type: Directory }, name: topolvm-config }', regexp: '^.*path: +/etc/kubernetes/scheduler\.yaml' }
-
-- name: Configure kube-scheduler (2/3)
-  lineinfile:
-    state: "{{topolvm_state}}"
-    path: /etc/kubernetes/manifests/kube-scheduler.yaml
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    insertafter: '^.*volumeMounts:'
-  with_items:
-  - { line: '    - { mountPath: /var/lib/scheduler, name: topolvm-config, readOnly: true }', regexp: '^.*mountPath: +/var/lib/scheduler/scheduler-config\.yaml' }
-
-- name: Configure kube-scheduler (3/3)
-  lineinfile:
-    state: "{{topolvm_state}}"
-    path: /etc/kubernetes/manifests/kube-scheduler.yaml
-    regexp: "{{ item.regexp }}"
-    line: "{{ item.line }}"
-    insertafter: '^.*leader-elect'
-  with_items:
-  - { line: '    - --config=/var/lib/scheduler/scheduler-config.yaml', regexp: '^.*config=/var/lib/scheduler/scheduler-config\.yaml' }
-
-# ------------------------------------- Cleanup
-
-- name: Remove scheduler folder
-  file:
-    state: "{{topolvm_state}}"
-    path: /etc/kubernetes/scheduler
-  when: topolvm_state == 'absent'
+# --------------------------------- Cleanup
 
 - name: Remove topolvm namespace
   k8s:
