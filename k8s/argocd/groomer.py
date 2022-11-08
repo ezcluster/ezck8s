@@ -27,6 +27,16 @@ INGRESS_NGINX = "ingress_nginx"
 EXTERNAL_IP = "external_ip"
 
 
+DATA="data"
+LOCAL_DNS="local_dns"
+
+def resolveDnsAndCheckWithLocal(model, addr):
+    if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
+        return model[DATA][LOCAL_DNS][addr]
+    else:
+        return resolveDnsAndCheck(addr)
+
+
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
     setDefaultInMap(model[CLUSTER][K8S], ARGOCD, {})
@@ -35,11 +45,11 @@ def groom(_plugin, model):
         return False
     else:
         if LOAD_BALANCER_IP in model[CLUSTER][K8S][ARGOCD]:
-            model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP] = resolveDnsAndCheck(model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP])
+            model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP])
         if INGRESS_NGINX_HOST in model[CLUSTER][K8S][ARGOCD]:
             if INGRESS_NGINX in model[CLUSTER][K8S] and EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
-                ingress_ip = resolveDnsAndCheck(model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
-                argocd_ip = resolveDnsAndCheck(model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST])  # error if it does not resolve.
+                ingress_ip = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
+                argocd_ip = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST])  # error if it does not resolve.
                 if argocd_ip != ingress_ip:
                     ERROR("k8s.argocd: 'ingress_nginx_host' and 'ingress_nginx.external_ip' must resolve on same ip ({} != {})".format(argocd_ip, ingress_ip))
         return True

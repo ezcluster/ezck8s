@@ -30,6 +30,16 @@ DASHBOARD_HOST = "dashboard_host"
 COMMAND_LINE_ARGUMENTS = "command_line_arguments"
 
 
+DATA="data"
+LOCAL_DNS="local_dns"
+
+def resolveDnsAndCheckWithLocal(model, addr):
+    if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
+        return model[DATA][LOCAL_DNS][addr]
+    else:
+        return resolveDnsAndCheck(addr)
+
+
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
     setDefaultInMap(model[CLUSTER][K8S], INGRESS_NGINX, {})
@@ -39,7 +49,7 @@ def groom(_plugin, model):
         return False
     else:
         if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
-            model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] = resolveDnsAndCheck(model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
+            model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
         if DASHBOARD_HOST in model[CLUSTER][K8S][INGRESS_NGINX]:
             dashboard_ip = resolveDns(model[CLUSTER][K8S][INGRESS_NGINX][DASHBOARD_HOST])
             if dashboard_ip is not None:

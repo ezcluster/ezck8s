@@ -27,15 +27,15 @@ FIRST = "first"
 LAST = "last"
 DASHBOARD_IP = "dashboard_ip"
 
-OPENSTACK="openstack"
-DNS_RECORDS="dns_records"
-NAME="name"
-RECORDS="records"
-DOMAIN="domain"
-DNS_ZONE="dns_zone"
-CONFIG="config"
-PROJECTS="projects"
-PROJECT="project"
+# OPENSTACK="openstack"
+# DNS_RECORDS="dns_records"
+# NAME="name"
+# RECORDS="records"
+# DOMAIN="domain"
+# DNS_ZONE="dns_zone"
+# CONFIG="config"
+# PROJECTS="projects"
+# PROJECT="project"
 #
 # ipCheck = re.compile("^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$")
 #
@@ -59,6 +59,16 @@ PROJECT="project"
 #         return resolveDnsAndCheck(fqdnOrIp)
 #
 
+DATA="data"
+LOCAL_DNS="local_dns"
+
+def resolveDnsAndCheckWithLocal(model, addr):
+    if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
+        return model[DATA][LOCAL_DNS][addr]
+    else:
+        return resolveDnsAndCheck(addr)
+
+
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
     setDefaultInMap(model[CLUSTER][K8S], METALLB, {})
@@ -69,11 +79,11 @@ def groom(_plugin, model):
         dashboard_ip = None  # Just to remove a warning
         dashboardInRange = False
         if DASHBOARD_IP in model[CLUSTER][K8S][METALLB]:
-            model[CLUSTER][K8S][METALLB][DASHBOARD_IP] = resolveDnsAndCheck(model[CLUSTER][K8S][METALLB][DASHBOARD_IP])
+            model[CLUSTER][K8S][METALLB][DASHBOARD_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][METALLB][DASHBOARD_IP])
             dashboard_ip = ipaddress.ip_address(u"" + model[CLUSTER][K8S][METALLB][DASHBOARD_IP])
         for rangeip in model[CLUSTER][K8S][METALLB][EXTERNAL_IP_RANGES]:
-            rangeip[FIRST] = resolveDnsAndCheck(rangeip[FIRST])
-            rangeip[LAST] = resolveDnsAndCheck(rangeip[LAST])
+            rangeip[FIRST] = resolveDnsAndCheckWithLocal(model, rangeip[FIRST])
+            rangeip[LAST] = resolveDnsAndCheckWithLocal(model, rangeip[LAST])
             first_ip = ipaddress.ip_address(u"" + rangeip[FIRST])
             last_ip = ipaddress.ip_address(u"" + rangeip[LAST])
             if not last_ip > first_ip:
