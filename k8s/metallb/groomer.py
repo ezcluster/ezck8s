@@ -27,6 +27,37 @@ FIRST = "first"
 LAST = "last"
 DASHBOARD_IP = "dashboard_ip"
 
+OPENSTACK="openstack"
+DNS_RECORDS="dns_records"
+NAME="name"
+RECORDS="records"
+DOMAIN="domain"
+DNS_ZONE="dns_zone"
+CONFIG="config"
+PROJECTS="projects"
+PROJECT="project"
+#
+# ipCheck = re.compile("^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$")
+#
+# def resolveDnsAndCheckOs(model, fqdnOrIp):
+#     if ipCheck.match(fqdnOrIp):
+#         return fqdnOrIp
+#     if OPENSTACK in model[CLUSTER] and DNS_RECORDS in model[CLUSTER][OPENSTACK]:
+#         ipByName = {}
+#         for record in model[CLUSTER][OPENSTACK][DNS_RECORDS]:
+#             ipByName[record[NAME]] = record[RECORDS][0]
+#         if not fqdnOrIp.endswith("."):
+#             if DOMAIN not in model[CLUSTER]:
+#                 ERROR("domain must be defined at the top level cluster file")
+#             project = model[CONFIG][PROJECTS][model[CLUSTER][OPENSTACK][PROJECT]]
+#             fqdnOrIp = "{}.{}.{}".format(fqdnOrIp, model[CLUSTER][DOMAIN], project[DNS_ZONE])
+#         if fqdnOrIp in ipByName:
+#             return ipByName[fqdnOrIp]
+#         else:
+#             return resolveDnsAndCheck(fqdnOrIp)
+#     else:
+#         return resolveDnsAndCheck(fqdnOrIp)
+#
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
