@@ -39,6 +39,11 @@ def resolveDnsAndCheckWithLocal(model, addr):
     else:
         return resolveDnsAndCheck(addr)
 
+def resolveDnsWithLocal(model, addr):
+    if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
+        return model[DATA][LOCAL_DNS][addr]
+    else:
+        return resolveDns(addr)
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
@@ -51,7 +56,7 @@ def groom(_plugin, model):
         if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
             model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
         if DASHBOARD_HOST in model[CLUSTER][K8S][INGRESS_NGINX]:
-            dashboard_ip = resolveDns(model[CLUSTER][K8S][INGRESS_NGINX][DASHBOARD_HOST])
+            dashboard_ip = resolveDnsWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][DASHBOARD_HOST])
             if dashboard_ip is not None:
                 if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX] and model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] != dashboard_ip:
                     ERROR("k8s.ingress_nginx: 'external_ip' and 'dashboard_host' must resolve on same ip ({} != {})".format(model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP], dashboard_ip))
