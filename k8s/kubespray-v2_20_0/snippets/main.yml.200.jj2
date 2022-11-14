@@ -1,0 +1,137 @@
+
+{%% if  m.data.httpProxies.docker is defined and m.data.httpProxies.docker.proxy_ca_url is defined %%}
+- hosts: all
+  roles:
+  - { role: register_ca, register_ca_urls: [ "{{{m.data.httpProxies.docker.proxy_ca_url}}}" ] }  
+{%% endif %%}
+
+- import_playbook: {{{ m.data.helpers.kubespray.folder }}}/cluster.yml
+
+
+{%% if 'docker_certificates' in m.data and m.data.docker_certificates|length > 0 %%}
+- hosts: kube_node
+  tags: [ "docker_certificates" ]
+  tasks:
+{%% for cert in m.data.docker_certificates %%}
+  - name: Create certificate folder for '{{{cert.endpoint }}}'
+    file: path=/etc/docker/certs.d/{{{ cert.endpoint }}} state=directory owner=root group=root mode=0755
+  - name: copy certificate '{{{cert.endpoint }}}' file
+    copy: src={{{ cert.path }}} dest=/etc/docker/certs.d/{{{ cert.endpoint }}} owner=root group=root mode=0644
+    notify:
+    - restart_docker
+{%% if 'ip' in cert %%}
+  - name: Add '{{{cert.ip}}}    {{{cert.host}}}' in /etc/hosts
+    blockinfile:
+      path: /etc/hosts
+      marker: "# {mark} Ansible managed (kubspray plugin)"
+      content: "{{{cert.ip}}}   {{{cert.host}}}"
+{%% else %%}
+  - name: Ensure no fake definition in /etc/hosts
+    blockinfile:
+      path: /etc/hosts
+      marker: "# {mark} Ansible managed (kubspray plugin)"
+      content: "# Placeholder"
+{%% endif %%}
+{%% endfor %%}
+  handlers:
+  - name: Restart Docker
+    service:
+      name: docker
+      state: restarted
+    listen: restart_docker
+{%% endif %%}
+
+    
+- hosts:  kube_control_plane[0]
+  tags: [ "node_labels", "node_taints" ]
+  tasks:
+  - name: Install k8s ansible module required package (Redhat)
+    yum: name=python2-openshift state=present
+    when: ansible_os_family == "RedHat"
+  - name: Install k8s ansible module required package (Debian)
+    block:
+      - apt:
+          name: python3-pip
+          state: present
+      - pip:
+          name:
+            - openshift==0.13.1
+            - pyyaml==5.3.1
+            - kubernetes==24.2.0
+           # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
+           # For example, kubernetes==25.3.0 will fail for next step in such context:
+           # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
+    when: ansible_os_family == "Debian"
+{%%- for role in m.cluster.roles %%}
+{%%- if role.k8s is defined and (role.k8s.node_labels is defined or role.k8s.node_taints is defined) %%}    
+  - name: Set Node label and taint for role {{{role.name}}}
+    kubernetes.core.k8s:
+      state: present
+      definition:
+        apiVersion: "v1"
+        kind: Node
+        metadata:
+          name: "{{item}}"
+{%%- if role.k8s.node_labels is defined %%}     
+          labels: {{{role.k8s.node_labels}}}
+{%% endif %%}
+{%%- if role.k8s.node_taints is defined %%}     
+        spec:
+          taints: {{{ role.k8s.node_taints }}}
+{%% endif %%}
+    with_items: 
+{%% for node in role.nodes %%}
+    - {{{node.name}}}
+{%% endfor %%}
+{%% endif %%}    
+{%% endfor %%}
+
+
+- hosts:  kube_control_plane
+  tasks:
+  - name: "Restore master node IP in config file (Was set to localhost since kubespray v2.16.0)"
+    ansible.builtin.replace:
+      path: /root/.kube/config
+      regexp: 'https://127.0.0.1:'
+{%% if m.cluster.vagrant is defined %%}
+      replace: 'https://{{ ansible_host }}:'
+{%% else %%}      
+      replace: 'https://{{ ansible_default_ipv4.address }}:'
+{%% endif %%}
+    tags: [ "client" ]      
+  - name: "Copy config file locally"
+    fetch:
+      src: /root/.kube/config
+      dest: ./config
+      flat: yes
+    run_once: true      
+    tags: [ "client" ]      
+{%% if m.data.httpProxies.master_root is defined %%}
+  - name: Add proxy config to root environment on master node(s)
+    blockinfile:
+      path: /root/.bashrc
+      marker: "# {mark} ANSIBLE MANAGED BLOCK FOR HTTP_PROXY"
+      create: yes
+      block: |
+{%% if m.data.httpProxies.master_root.http_proxy is defined %%}
+        export http_proxy={{{m.data.httpProxies.master_root.http_proxy}}}
+{%% endif %%}
+{%% if m.data.httpProxies.master_root.https_proxy is defined %%}
+        export https_proxy={{{m.data.httpProxies.master_root.https_proxy}}}
+{%% endif %%}
+{%% if m.data.httpProxies.master_root.no_proxy is defined %%}
+        export no_proxy={{{m.data.httpProxies.master_root.no_proxy}}}
+{%% endif %%}
+    tags: [ "proxy", "http_proxy", "master_root_http_proxy" ]      
+{%% endif %%}
+{%% if m.data.repositories.k9s is defined or m.data.repositories.helm is defined %%}    
+  roles:
+{%% endif %%}    
+{%% if m.data.repositories.k9s is defined %%}    
+  - { role: k9s,  tags: [ "client", "k9s" ], k9s_tgz_url: "{{{ m.data.repositories.k9s.k9s_tgz_url}}}" }
+{%% endif %%}    
+{%% if m.data.repositories.helm is defined %%}    
+  - { role: helm,  tags: [ "client", "helm" ], helm_tgz_url: "{{{ m.data.repositories.helm.helm_tgz_url}}}" }
+{%% endif %%}    
+    
+    
