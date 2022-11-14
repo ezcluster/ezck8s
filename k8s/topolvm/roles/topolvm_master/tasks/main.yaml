@@ -10,3 +10,8 @@
 - name: Use version for kubernetes >= 1.19
   include_tasks: main_v3.yml
   when: topolvm_version == "0.12.0"
+
+- name: Use version for kubernetes >= 1.19
+  include_tasks: main_v3.yml
+  when: topolvm_version == "0.15.3"
+
