@@ -35,13 +35,20 @@
 - name: Copy definition file
   template:
     src: metallb_{{ metallb_version }}.yaml
-    dest: /tmp/metallb.yaml  
+    dest: /tmp/metallb.yaml
 
-- name: Copy configuration file
+- name: Copy configuration file (Version <= 0.12)
   template:
-    src: metallb-config.yaml
-    dest: /tmp/metallb-config.yaml  
-       
+    src: metallb-config.le0.12.yaml
+    dest: /tmp/metallb-config.yaml
+  when: metallb_version is version('0.12',  '<=')
+
+- name: Copy configuration file (Version >= 0.13)
+  template:
+    src: metallb-config.ge0.13.yaml
+    dest: /tmp/metallb-config.yaml
+  when: metallb_version is version('0.13',  '>=')
+
 - name: Install metallb
   k8s:
     state: present

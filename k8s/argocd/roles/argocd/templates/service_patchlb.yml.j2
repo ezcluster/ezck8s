@@ -7,9 +7,10 @@ metadata:
     app.kubernetes.io/name: argocd-server
     app.kubernetes.io/part-of: argocd
   name: argocd-server
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: {{argocd_load_balancer_ip}}
 spec:
   type: LoadBalancer
-  loadBalancerIP: {{argocd_load_balancer_ip}}
   ports:
   - name: http
     port: 80

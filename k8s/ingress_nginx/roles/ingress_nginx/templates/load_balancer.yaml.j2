@@ -3,14 +3,15 @@ apiVersion: v1
 kind: Service
 metadata:
   name: ingress-lb
-  namespace: ingress-nginx 
+  namespace: ingress-nginx
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: {{ingress_nginx_external_ip}}
 spec:
   type: LoadBalancer
   selector:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
     app.kubernetes.io/name: ingress-nginx
-  loadBalancerIP: {{ingress_nginx_external_ip}}
   ports:
     - name: http
       protocol: TCP
