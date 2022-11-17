@@ -1,7 +1,7 @@
 
 
 - hosts: kube_control_plane[0]:rancher[0]
-  tags: [ "ingress", "nginx", "ingress_nginx", "ingressnginx", "ingress-nginx" ]
+  tags: [ "ingress", "nginx", "ingress_nginx", "ingressnginx", "ingress-nginx", "addons" ]
   roles:
   - role: "ingress_nginx"
     ingress_nginx_version: "{{{ m.cluster.k8s.ingress_nginx.version }}}"

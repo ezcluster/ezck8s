@@ -124,14 +124,15 @@
 {%% endif %%}
     tags: [ "proxy", "http_proxy", "master_root_http_proxy" ]      
 {%% endif %%}
+
 {%% if m.data.repositories.k9s is defined or m.data.repositories.helm is defined %%}    
   roles:
 {%% endif %%}    
 {%% if m.data.repositories.k9s is defined %%}    
-  - { role: k9s,  tags: [ "client", "k9s" ], k9s_tgz_url: "{{{ m.data.repositories.k9s.k9s_tgz_url}}}" }
+  - { role: k9s,  tags: [ "client", "k9s", "addons" ], k9s_tgz_url: "{{{ m.data.repositories.k9s.k9s_tgz_url}}}" }
 {%% endif %%}    
 {%% if m.data.repositories.helm is defined %%}    
-  - { role: helm,  tags: [ "client", "helm" ], helm_tgz_url: "{{{ m.data.repositories.helm.helm_tgz_url}}}" }
+  - { role: helm,  tags: [ "client", "helm", "addons" ], helm_tgz_url: "{{{ m.data.repositories.helm.helm_tgz_url}}}" }
 {%% endif %%}    
     
     

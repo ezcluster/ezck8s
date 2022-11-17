@@ -2,7 +2,7 @@
 
 
 - hosts: _topolvm_
-  tags: [ "topolvm", "topolvm_lvmd" ]
+  tags: [ "topolvm", "topolvm_lvmd", "addons" ]
   vars:
     topolvm_lvmd_tgz_url: {{{m.data.repositories.topolvm.lvmd_tgz_url }}}
   roles:
@@ -10,7 +10,7 @@
 
 
 - hosts: kube_control_plane[0]
-  tags: [ "topolvm", "topolvm_master" ]
+  tags: [ "topolvm", "topolvm_master", "addons" ]
   vars:
     topolvm_state: present
     topolvm_version: {{{ m.data.repositories.topolvm.version }}}
@@ -25,7 +25,7 @@
   
 
 - hosts: kube_control_plane
-  tags: [ "topolvm", "topolvm_master" ]
+  tags: [ "topolvm", "topolvm_master", "addons" ]
   vars:
     topolvm_state: present
     topolvm_version: {{{ m.data.repositories.topolvm.version }}}

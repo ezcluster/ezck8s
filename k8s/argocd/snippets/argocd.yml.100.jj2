@@ -1,6 +1,6 @@
 
 - hosts: kube_control_plane[0]:rancher[0]
-  tags: [ "argocd", "argoc_cd", "argo-cd" ]
+  tags: [ "argocd", "argoc_cd", "argo-cd", "addons" ]
   roles:
   - role: "argocd"
     argocd_version: "{{{ m.cluster.k8s.argocd.version }}}"

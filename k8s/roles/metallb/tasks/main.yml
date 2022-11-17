@@ -81,9 +81,11 @@
       src: /tmp/memberList.yaml
   when: mlb_secret.resources|length == 0 
 
-  
-- name: Configure metallb
+- name: Configure metallb (May wait for the controller webhook to be ready)
   k8s:
     state: present
     src: "/tmp/metallb-config.yaml"
-        
+  retries: 30   # NB: May take long time to load image
+  delay: 5
+  register: result
+  until: not result.failed
