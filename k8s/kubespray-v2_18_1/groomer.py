@@ -37,6 +37,7 @@ AUDIT = "audit"
 POD_SECURITY_POLICIES = "pod_security_policies"
 REPOSITORIES = "repositories"
 DASHBOARD = "dashboard"
+OFFLINE="offline"
 
 
 def groom(_plugin, model):
@@ -47,6 +48,7 @@ def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], METRICS_SERVER, True)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], AUDIT, False)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DASHBOARD, False)
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], OFFLINE, {})
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], POD_SECURITY_POLICIES, True)
     if model[CLUSTER][K8S][KUBESPRAY][DISABLED]:
         return False
