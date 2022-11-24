@@ -20,6 +20,7 @@
 {%% endif %%}
     topolvm_device_classes: 
 {{{m.cluster.k8s.topolvm.device_classes|to_pretty_yaml|indent(4, first=True) }}}
+    topolvm_image_prefix: {{{ m.cluster.k8s.topolvm.offline.image_prefix}}}
   roles:
   - topolvm_master  
   

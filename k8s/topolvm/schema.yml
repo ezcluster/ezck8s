@@ -41,6 +41,13 @@ mapping:
                 "volume_group": { type: str, required: false } # default: "topolvm-{{device_class_name}}"
                 "fstype": { type: str, required: false, enum: [ "ext4", "xfs", "btrfs"] }  # default to xfs
                 "allow_volume_expansion": { type: bool, required: true }  
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "image_prefix": { type: str, required: false }
+
+
 
   "roles": 
     type: seq
