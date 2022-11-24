@@ -36,4 +36,10 @@ mapping:
               mapping:
                 "name": { type: str, required: True } 
                 "id": { type: str, required: True } 
-            
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "pip_proxy": { type: str, required: false }
+              "image_prefix": { type: str, required: false }
+

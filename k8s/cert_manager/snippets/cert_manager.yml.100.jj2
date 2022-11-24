@@ -9,7 +9,11 @@
     {{{ m.data.cluster_issuers |  to_pretty_yaml | indent(4) }}}
 {%% else %%}
     cert_manager_cluster_issuers: []
-{%% endif %%} 
+{%% endif %%}
+{%% if  m.cluster.k8s.cert_manager.offline.pip_proxy is defined %%}
+    cert_manager_pip_extra_args: "--proxy '{{{  m.cluster.k8s.cert_manager.offline.pip_proxy  }}}'"
+{%% endif %%}
+    cert_manager_image_prefix: "{{{  m.cluster.k8s.cert_manager.offline.image_prefix  }}}"
   roles:
   - cert_manager
   

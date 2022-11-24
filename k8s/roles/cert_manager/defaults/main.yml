@@ -17,8 +17,7 @@
 
 
 
-cert_manager_version: "1.10.0"
+# cert_manager_version: "1.10.0"
 
-    
-    
-    
+# cert_manager_pip_extra_args: "--proxy '"http://repo1.ops.scw01:3128"'"
+# cert_manager_image_prefix: "harbor1.ops.scw01/"

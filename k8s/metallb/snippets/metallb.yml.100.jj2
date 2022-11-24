@@ -14,8 +14,8 @@
 {%% endif %%}     
 {%% if  m.cluster.k8s.metallb.offline.pip_proxy is defined %%}
       pip_extra_args: "--proxy '{{{  m.cluster.k8s.metallb.offline.pip_proxy  }}}'"
-      image_prefix: "{{{  m.cluster.k8s.metallb.offline.image_prefix  }}}"
 {%% endif %%}
+      image_prefix: "{{{  m.cluster.k8s.metallb.offline.image_prefix  }}}"
   roles:
   - { role: "metallb", metallb_version: {{{ m.cluster.k8s.metallb.version }}} }
       

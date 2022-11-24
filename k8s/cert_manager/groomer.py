@@ -28,7 +28,8 @@ DATA = "data"
 NAME = "name"
 ID = "id"
 CLUSTER_ISSUERS = "cluster_issuers"
-
+OFFLINE="offline"
+IMAGE_PREFIX="image_prefix"
 
 def groomIssuers(model):
     model[DATA][CERT_MANAGER_ISSUER_BY_ID] = {}
@@ -47,6 +48,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][CERT_MANAGER][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[CLUSTER][K8S][CERT_MANAGER], OFFLINE, {})
+        setDefaultInMap(model[CLUSTER][K8S][CERT_MANAGER][OFFLINE], IMAGE_PREFIX, "")
         model[DATA][CLUSTER_ISSUERS] = []
         if CLUSTER_ISSUERS in model[CLUSTER][K8S][CERT_MANAGER]:
             for issuerDef in model[CLUSTER][K8S][CERT_MANAGER][CLUSTER_ISSUERS]:
