@@ -16,4 +16,7 @@
 {%% if m.cluster.k8s.argocd.cluster_issuer is defined %%}
     argocd_cluster_issuer: {{{ m.cluster.k8s.argocd.cluster_issuer }}}
 {%% endif %%}
-     
+{%% if  m.cluster.k8s.argocd.offline.pip_proxy is defined %%}
+    argocd_pip_extra_args: "--proxy '{{{  m.cluster.k8s.argocd.offline.pip_proxy  }}}'"
+{%% endif %%}
+    argocd_image_prefix: "{{{ m.cluster.k8s.argocd.offline.image_prefix }}}"

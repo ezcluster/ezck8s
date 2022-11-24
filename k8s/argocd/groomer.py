@@ -25,10 +25,11 @@ LOAD_BALANCER_IP = "load_balancer_ip"
 INGRESS_NGINX_HOST = "ingress_nginx_host"
 INGRESS_NGINX = "ingress_nginx"
 EXTERNAL_IP = "external_ip"
-
-
 DATA="data"
 LOCAL_DNS="local_dns"
+OFFLINE="offline"
+IMAGE_PREFIX="image_prefix"
+
 
 def resolveDnsAndCheckWithLocal(model, addr):
     if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
@@ -44,6 +45,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][ARGOCD][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD], OFFLINE, {})
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][OFFLINE], IMAGE_PREFIX, "")
         if LOAD_BALANCER_IP in model[CLUSTER][K8S][ARGOCD]:
             model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP])
         if INGRESS_NGINX_HOST in model[CLUSTER][K8S][ARGOCD]:

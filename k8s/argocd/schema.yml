@@ -32,5 +32,11 @@ mapping:
           "ingress_nginx_host": { type: str, required: False }    # Create an ingress for ingress-nginx-controller
           "manifest": { type: str, required: False }              # Will override the role/default
           "cluster_issuer": { type: str, required: False }        # Cert-manager cluster-issuer to certify our TLS connection
-              
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "pip_proxy": { type: str, required: false }
+              "image_prefix": { type: str, required: false }
+
                 

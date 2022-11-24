@@ -21,5 +21,10 @@
 
 # argocd_ingress_nginx_host: argocd.kspray11
      
-argocd_manifest: https://raw.githubusercontent.com/argoproj/argo-cd/v{{argocd_version}}/manifests/install.yaml    
-    
+argocd_manifest: https://raw.githubusercontent.com/argoproj/argo-cd/v{{argocd_version}}/manifests/install.yaml
+
+argocd_image_prefix: ""
+
+# argocd_pip_extra_args: "--proxy '"http://repo1.ops.scw01:3128"'"
+# argocd_image_prefix: "harbor1.ops.scw01/kubespray-addons/"
+
