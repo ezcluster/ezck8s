@@ -37,5 +37,11 @@ mapping:
                 "first": { type: str, required: true }
                 "last": { type: str, required: true }
           "dashboard_ip": { type: str, required: false }
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "pip_proxy": { type: str, required: false }
+              "image_prefix": { type: str, required: false }
               
                 

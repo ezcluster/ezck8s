@@ -57,7 +57,13 @@ mapping:
             type: map
             required: false
             mapping:
-              "repo_path_prefix": { type: str, required: false }
+              "files_repository": { type: str, required: false }
+              "kube_image_repo": { type: str, required: false }
+              "quay_image_repo": { type: str, required: false }
+              "docker_image_repo": { type: str, required: false }
+              "github_image_repo": { type: str, required: false }
+              "pip_proxy": { type: str, required: false }
+
 
   "roles":
     type: seq

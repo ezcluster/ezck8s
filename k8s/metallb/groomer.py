@@ -26,6 +26,8 @@ EXTERNAL_IP_RANGES = "external_ip_ranges"
 FIRST = "first"
 LAST = "last"
 DASHBOARD_IP = "dashboard_ip"
+OFFLINE="offline"
+IMAGE_PREFIX="image_prefix"
 
 # OPENSTACK="openstack"
 # DNS_RECORDS="dns_records"
@@ -76,6 +78,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][METALLB][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[CLUSTER][K8S][METALLB], OFFLINE, {})
+        setDefaultInMap(model[CLUSTER][K8S][METALLB][OFFLINE], IMAGE_PREFIX, "")
         dashboard_ip = None  # Just to remove a warning
         dashboardInRange = False
         if DASHBOARD_IP in model[CLUSTER][K8S][METALLB]:
