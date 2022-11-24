@@ -42,13 +42,13 @@
   copy:
     src: "{{argocd_manifest}}"
     dest: "/tmp/argocd.yaml"
-  when: argocd_manifest is not match("https://.*")
+  when: argocd_manifest is not match("http[s]?://.*")
 
 - name: "Copy argocd deployment manifest from remote url"
   get_url:
     url: "{{argocd_manifest}}"
     dest: "/tmp/argocd.yaml"
-  when: argocd_manifest is match("https://.*")
+  when: argocd_manifest is match("http[s]?://.*")
               
 - name: Install argocd
   k8s:

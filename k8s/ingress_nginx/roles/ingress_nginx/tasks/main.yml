@@ -21,14 +21,20 @@
   when: ansible_os_family == "RedHat"
 - name: Install k8s ansible module required package (Debian)
   block:
-    - apt:
+    - name: Install python3-pip with apt
+      ansible.builtin.apt:
         name: python3-pip
         state: present
-    - pip:
+    - name: Pip install k8s required modules
+      ansible.builtin.pip:
         name:
-          - openshift
-          - pyyaml
-          - kubernetes>=23.6.0
+          - openshift==0.13.1
+          - pyyaml==5.3.1
+          - kubernetes==24.2.0
+         # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
+         # For example, kubernetes==25.3.0 will fail for next step in such context:
+         # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
+        extra_args: "{{ ingress_nginx_pip_extra_args | default(omit) }}"
   when: ansible_os_family == "Debian"
 
 - name: Ensure working temp folder
@@ -53,14 +59,14 @@
     src: "{{ingress_nginx_manifest}}"
     dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
   changed_when: false
-  when: ingress_nginx_manifest is not match("https://.*")
+  when: ingress_nginx_manifest is not match("http[s]?://.*")
 
 - name: "Copy ingress_nginx deployment manifest from remote url"
   get_url:
     url: "{{ingress_nginx_manifest}}"
     dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
   changed_when: false
-  when: ingress_nginx_manifest is match("https://.*")
+  when: ingress_nginx_manifest is match("http[s]?://.*")
 
 - name: "Add command line arguments"
   lineinfile:
@@ -70,7 +76,14 @@
     insertafter: '^.*- /nginx-ingress-controller'
   changed_when: false
   with_items: "{{ingress_nginx_command_line_arguments}}"
-              
+
+- name: "Add image prefix"
+  replace:
+    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+    regexp: 'image:[\s]*registry.k8s.io/ingress-nginx'
+    replace: "image: {{ingress_nginx_image_prefix}}registry.k8s.io/ingress-nginx"
+  when: ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix != ""
+
 - name: Install ingress_nginx
   k8s:
     state: present

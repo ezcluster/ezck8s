@@ -28,6 +28,8 @@ EXTERNAL_IP = "external_ip"
 ENABLE_SSL_PASSTHROUGH = "enable_ssl_passthrough"
 DASHBOARD_HOST = "dashboard_host"
 COMMAND_LINE_ARGUMENTS = "command_line_arguments"
+OFFLINE="offline"
+IMAGE_PREFIX="image_prefix"
 
 
 DATA="data"
@@ -53,6 +55,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][INGRESS_NGINX][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[CLUSTER][K8S][INGRESS_NGINX], OFFLINE, {})
+        setDefaultInMap(model[CLUSTER][K8S][INGRESS_NGINX][OFFLINE], IMAGE_PREFIX, "")
         if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
             model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
         if DASHBOARD_HOST in model[CLUSTER][K8S][INGRESS_NGINX]:

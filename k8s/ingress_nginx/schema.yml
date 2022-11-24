@@ -38,5 +38,11 @@ mapping:
             required: false
             sequence:
             - type: str
-              
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "pip_proxy": { type: str, required: false }
+              "image_prefix": { type: str, required: false }
+
                 
