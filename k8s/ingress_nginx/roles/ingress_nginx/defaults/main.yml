@@ -25,14 +25,17 @@
 #ingress_nginx_dashboard_host: dashboard.kspray11
 
 ingress_nginx_command_line_arguments: []
-    
-ingress_nginx_manifest: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ingress_nginx_version}}/deploy/static/provider/baremetal/deploy.yaml    
+
+## OBSOLETED. Now use local template
+## ingress_nginx_manifest: https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v{{ingress_nginx_version}}/deploy/static/provider/baremetal/deploy.yaml
 
 ingress_nginx_tmp_folder: /tmp/ingress-nginx
 
 ingress_nginx_set_psp: true
 
 ingress_nginx_image_prefix: ""
+
+ingress_nginx_remove_sha: no
 
 # ingress_nginx_pip_extra_args: "--proxy '"http://repo1.ops.scw01:3128"'"
 # ingress_nginx_image_prefix: "harbor1.ops.scw01/"

@@ -54,37 +54,43 @@
       src:  "{{ingress_nginx_tmp_folder}}/psp.yaml"
   when: ingress_nginx_set_psp    
 
-- name: "Copy ingress_nginx deployment manifest from local files"
-  copy:
-    src: "{{ingress_nginx_manifest}}"
+#- name: "Copy ingress_nginx deployment manifest from local files"
+#  copy:
+#    src: "{{ingress_nginx_manifest}}"
+#    dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+#  changed_when: false
+#  when: ingress_nginx_manifest is not match("http[s]?://.*")
+#
+#- name: "Copy ingress_nginx deployment manifest from remote url"
+#  get_url:
+#    url: "{{ingress_nginx_manifest}}"
+#    dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+#  changed_when: false
+#  when: ingress_nginx_manifest is match("http[s]?://.*")
+#
+#- name: "Add command line arguments"
+#  lineinfile:
+#    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+#    regexp: "^.*{{item}}.*"
+#    line: "        - {{item}}"
+#    insertafter: '^.*- /nginx-ingress-controller'
+#  changed_when: false
+#  with_items: "{{ingress_nginx_command_line_arguments}}"
+#
+#- name: "Add image prefix"
+#  replace:
+#    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
+#    regexp: 'image:[\s]*registry.k8s.io/ingress-nginx'
+#    replace: "image: {{ingress_nginx_image_prefix}}registry.k8s.io/ingress-nginx"
+#  when: ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix != ""
+
+
+- name: Generate the deployment manifest
+  template:
+    src: "deploy_v{{ingress_nginx_version}}.yaml.j2"
     dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
-  changed_when: false
-  when: ingress_nginx_manifest is not match("http[s]?://.*")
 
-- name: "Copy ingress_nginx deployment manifest from remote url"
-  get_url:
-    url: "{{ingress_nginx_manifest}}"
-    dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
-  changed_when: false
-  when: ingress_nginx_manifest is match("http[s]?://.*")
-
-- name: "Add command line arguments"
-  lineinfile:
-    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
-    regexp: "^.*{{item}}.*"
-    line: "        - {{item}}"
-    insertafter: '^.*- /nginx-ingress-controller'
-  changed_when: false
-  with_items: "{{ingress_nginx_command_line_arguments}}"
-
-- name: "Add image prefix"
-  replace:
-    path: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
-    regexp: 'image:[\s]*registry.k8s.io/ingress-nginx'
-    replace: "image: {{ingress_nginx_image_prefix}}registry.k8s.io/ingress-nginx"
-  when: ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix != ""
-
-- name: Install ingress_nginx
+- name: Apply the deployment manifiest
   k8s:
     state: present
     src: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"

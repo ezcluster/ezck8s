@@ -32,8 +32,7 @@ mapping:
           "http_node_port": { type: int, required: False }
           "https_node_port": { type: int, required: False }
           "dashboard_host": { type: str, required: False }
-          "manifest": { type: str, required: False }
-          "command_line_arguments": 
+          "command_line_arguments":
             type: seq
             required: false
             sequence:
@@ -44,5 +43,6 @@ mapping:
             mapping:
               "pip_proxy": { type: str, required: false }
               "image_prefix": { type: str, required: false }
+              "remove_sha": { type: bool, required: false }
 
                 

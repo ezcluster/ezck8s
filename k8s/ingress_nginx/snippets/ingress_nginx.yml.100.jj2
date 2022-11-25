@@ -5,9 +5,6 @@
   roles:
   - role: "ingress_nginx"
     ingress_nginx_version: "{{{ m.cluster.k8s.ingress_nginx.version }}}"
-{%% if m.cluster.k8s.ingress_nginx.manifest is defined %%}
-    ingress_nginx_manifest: {{{ m.cluster.k8s.ingress_nginx.manifest }}}
-{%% endif %%}
 {%% if m.cluster.k8s.ingress_nginx.external_ip is defined %%}
     ingress_nginx_external_ip: "{{{ m.cluster.k8s.ingress_nginx.external_ip }}}"
 {%% endif %%}
@@ -25,6 +22,9 @@
 {%% endif %%}
 {%% if  m.cluster.k8s.ingress_nginx.offline.pip_proxy is defined %%}
     ingress_nginx_pip_extra_args: "--proxy '{{{  m.cluster.k8s.ingress_nginx.offline.pip_proxy  }}}'"
+{%% endif %%}
+{%% if  m.cluster.k8s.ingress_nginx.offline.remove_sha is defined %%}
+    ingress_nginx_remove_sha: "{{{  m.cluster.k8s.ingress_nginx.offline.remove_sha  }}}"
 {%% endif %%}
     ingress_nginx_image_prefix: "{{{ m.cluster.k8s.ingress_nginx.offline.image_prefix }}}"
   
