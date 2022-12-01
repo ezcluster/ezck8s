@@ -90,7 +90,7 @@
     src: "deploy_v{{ingress_nginx_version}}.yaml.j2"
     dest: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
 
-- name: Apply the deployment manifiest
+- name: Apply the deployment manifest
   k8s:
     state: present
     src: "{{ingress_nginx_tmp_folder}}/ingress_nginx.yaml"
