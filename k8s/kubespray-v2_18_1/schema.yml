@@ -27,7 +27,8 @@ mapping:
         required: true
         mapping:
           "disabled": { type: bool, required: False }    
-          "cluster_name": { type: str, required: True }
+          "cluster_name": { type: str, required: True }   # Default to cluster.local. Do not set to an existing domain, as coreDNS will be authority on it.
+          "dns_domain": { type: str, required: false }   # Default to cluster.local. Do not set to an existing domain, as coreDNS will be authority on it.
           "helper_id": { type: str, required: True }
           "default_not_ready_toleration_seconds": { type: int, required: False }       
           "default_unreachable_toleration_seconds": { type: int, required: False }       

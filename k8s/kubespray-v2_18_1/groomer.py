@@ -38,6 +38,7 @@ POD_SECURITY_POLICIES = "pod_security_policies"
 REPOSITORIES = "repositories"
 DASHBOARD = "dashboard"
 OFFLINE="offline"
+DNS_DOMAIN="dns_domain"
 
 
 def groom(_plugin, model):
@@ -50,6 +51,8 @@ def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DASHBOARD, False)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], OFFLINE, {})
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], POD_SECURITY_POLICIES, True)
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DNS_DOMAIN, "cluster.local")
+
     if model[CLUSTER][K8S][KUBESPRAY][DISABLED]:
         return False
     else:
@@ -67,7 +70,7 @@ def groom(_plugin, model):
         if FILES_REPO_ID in model[CLUSTER][K8S][KUBESPRAY]:
             lookupRepository(model, "kubespray_files", repoId=model[CLUSTER][K8S][KUBESPRAY][FILES_REPO_ID])
         model[DATA][ROLE_PATHS].add(appendPath(model[DATA][HELPERS][KUBESPRAY][FOLDER], "roles"))
-        model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][CLUSTER_NAME].count(".") + 1
+        model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][DNS_DOMAIN].count(".") + 1
         certByName = {}
         if DOCKER_CERTIFICATES in model["config"]:
             for cert in model["config"][DOCKER_CERTIFICATES]:

@@ -161,8 +161,8 @@ kube_encrypt_secret_data: false
 # kubelet_shutdown_grace_period_critical_pods: 20s
 
 # DNS configuration.
-# Kubernetes cluster name, also will be used as DNS domain
-cluster_name: {{{ m.cluster.k8s.kubespray.cluster_name }}}  # EZCLUSTER: old: cluster.local
+# Kubernetes cluster name, also will be used as DNS domain EZCLUSTER: NO, this is not the case. See dns_domain below
+cluster_name: "{{{ m.cluster.k8s.kubespray.cluster_name }}}"  # EZCLUSTER: old: cluster.local
 # Subdomains of DNS domain to be resolved via /etc/resolv.conf for hostnet pods
 ndots: {{{ m.data.dnsNbrDots }}}  # EZCLUSTER: old: 2
 # Can be coredns, coredns_dual, manual or none
@@ -202,7 +202,8 @@ deploy_netchecker: false
 # Ip address of the kubernetes skydns service
 skydns_server: "{{ kube_service_addresses|ipaddr('net')|ipaddr(3)|ipaddr('address') }}"
 skydns_server_secondary: "{{ kube_service_addresses|ipaddr('net')|ipaddr(4)|ipaddr('address') }}"
-dns_domain: "{{ cluster_name }}"
+# WARNING: DO NOT SET the effective cluster domain name here. Otherwise the coreDNS will be authority for it and we will be unable to resolve all host in this domain.
+dns_domain: "{{{ m.cluster.k8s.kubespray.dns_domain }}}"  # EZCLUSTER: old: cluster_name
 
 ## Container runtime
 ## docker for docker, crio for cri-o and containerd for containerd.
