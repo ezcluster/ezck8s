@@ -15,7 +15,10 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
-from misc import setDefaultInMap, ERROR, resolveDnsAndCheck
+from misc import setDefaultInMap, ERROR, resolveDns, resolveDnsAndCheck
+import logging
+
+logger = logging.getLogger("ezcluster.groomer")
 
 CLUSTER = "cluster"
 K8S = "k8s"
@@ -38,6 +41,12 @@ def resolveDnsAndCheckWithLocal(model, addr):
         return resolveDnsAndCheck(addr)
 
 
+def resolveDnsWithLocal(model, addr):
+    if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
+        return model[DATA][LOCAL_DNS][addr]
+    else:
+        return resolveDns(addr)
+
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
     setDefaultInMap(model[CLUSTER][K8S], ARGOCD, {})
@@ -51,8 +60,12 @@ def groom(_plugin, model):
             model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][ARGOCD][LOAD_BALANCER_IP])
         if INGRESS_NGINX_HOST in model[CLUSTER][K8S][ARGOCD]:
             if INGRESS_NGINX in model[CLUSTER][K8S] and EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
-                ingress_ip = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
-                argocd_ip = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST])  # error if it does not resolve.
-                if argocd_ip != ingress_ip:
-                    ERROR("k8s.argocd: 'ingress_nginx_host' and 'ingress_nginx.external_ip' must resolve on same ip ({} != {})".format(argocd_ip, ingress_ip))
+                argocd_ip = resolveDnsWithLocal(model, model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST])
+                if argocd_ip is not None:
+                    ingress_ip = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
+                    if argocd_ip != ingress_ip:
+                        ERROR("k8s.argocd: 'ingress_nginx_host' and 'ingress_nginx.external_ip' must resolve on same ip ({} != {})".format(argocd_ip, ingress_ip))
+                else:
+                    logger.warning("Unable to resolve '{}' for now. May be this DNS entry will be created later.".format(model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST]))
+
         return True
