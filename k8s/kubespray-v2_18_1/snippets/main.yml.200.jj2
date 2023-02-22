@@ -42,8 +42,8 @@
 {%% endif %%}
 
     
-- hosts:  kube_control_plane[0]
-  tags: [ "node_labels", "node_taints" ]
+- hosts:  kube_control_plane
+  tags: [ "openshift" ]
   tasks:
   - name: Install k8s ansible module required package (Redhat)
     yum: name=python2-openshift state=present
@@ -67,6 +67,12 @@
           extra_args: "--proxy {{{ m.cluster.k8s.kubespray.offline.pip_proxy }}}"
 {%% endif %%}
     when: ansible_os_family == "Debian"
+
+
+
+- hosts:  kube_control_plane[0]
+  tags: [ "node_labels", "node_taints" ]
+  tasks:
 {%%- for role in m.cluster.roles %%}
 {%%- if role.k8s is defined and (role.k8s.node_labels is defined or role.k8s.node_taints is defined) %%}    
   - name: Set Node label and taint for role {{{role.name}}}

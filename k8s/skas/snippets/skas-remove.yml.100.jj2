@@ -1,0 +1,7 @@
+
+- hosts: kube_control_plane
+  tags: [ "skas" ]
+  vars:
+    skas_state: absent
+  roles:
+    - skas

@@ -6,6 +6,7 @@ metadata:
   namespace: ingress-nginx
   annotations:
     metallb.universe.tf/loadBalancerIPs: {{ingress_nginx_external_ip}}
+    metallb.universe.tf/allow-shared-ip: "ingress"
 spec:
   type: LoadBalancer
   selector:

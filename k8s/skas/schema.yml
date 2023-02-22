@@ -1,0 +1,39 @@
+# Copyright (C) 2020 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+type: map
+mapping:
+  "k8s":
+    type: map
+    required: true
+    mapping:
+      "skas":
+        type: map
+        required: true
+        mapping:
+          "disabled": { type: bool, required: False }
+          authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc:7014/v1/tokenReview
+          authCertName: { type: str, required: false }      # Default skas-auth-cert
+          namespace: { type: str, required: false }         # Default: skas-system
+          helmRelease: { type: str, required: false }       # Default: skas
+          helmChartUrl: { type: str, required: false }      # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/skas-0.1.0.tgz
+          helmValues: { type: any, required: true }
+          usersHelmRelease: { type: str, required: false }   # Default: skas-users
+          usersHelmChartUrl: { type: str, required: false } # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/users-0.1.0.tgz
+          usersHelmValues: { type: str, required: false }    # Default: ""
+

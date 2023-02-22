@@ -1,0 +1,4 @@
+
+- name: Install SKAS
+  import_playbook: skas.yml
+     
