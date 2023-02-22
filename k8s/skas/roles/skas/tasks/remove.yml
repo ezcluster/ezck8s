@@ -2,7 +2,7 @@
 # ---------------------------------------------------------------------------
 - name: API server clean configuration
   block:
-  - name: Unconfigure kube api server (1/4)
+  - name: Unconfigure kube api server (1/3)
     lineinfile:
       path: /etc/kubernetes/manifests/kube-apiserver.yaml
       regexp: "{{ item.regexp }}"
@@ -13,13 +13,13 @@
     - { regexp: '^.*dnsPolicy:.*' }
 
 
-  - name: Unconfigure kube api server (3/4)
+  - name: Unconfigure kube api server (2/3)
     blockinfile:
       path: /etc/kubernetes/manifests/kube-apiserver.yaml
       marker: "# Ansible skas config 1/4 hacking {mark}"
       state: absent
 
-  - name: Unconfigure kube api server (4/3)
+  - name: Unconfigure kube api server (3/3)
     blockinfile:
       path: /etc/kubernetes/manifests/kube-apiserver.yaml
       marker: "# Ansible skas config 2/4 hacking {mark}"

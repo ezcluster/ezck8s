@@ -33,7 +33,7 @@ mapping:
           helmRelease: { type: str, required: false }       # Default: skas
           helmChartUrl: { type: str, required: false }      # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/skas-0.1.0.tgz
           helmValues: { type: any, required: true }
-          usersHelmRelease: { type: str, required: false }   # Default: skas-users
-          usersHelmChartUrl: { type: str, required: false } # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/users-0.1.0.tgz
-          usersHelmValues: { type: str, required: false }    # Default: ""
+          usersHelmRelease: { type: str, required: false }   # Default: skusers
+          usersHelmChartUrl: { type: str, required: false } # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz
+          usersHelmValues: { type: any, required: false }    # Default: ""
 

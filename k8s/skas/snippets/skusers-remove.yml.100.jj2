@@ -1,0 +1,10 @@
+
+- hosts: kube_control_plane
+  tags: [ "skas", "skusers" ]
+  vars:
+    skas_users_state: absent
+    skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
+    skas_user_helm_release: {{{ m.cluster.k8s.skas.usersHelmRelease }}}
+    skas_user_helm_chart_url: {{{ m.cluster.k8s.skas.usersHelmChartUrl }}}
+  roles:
+    - skusers

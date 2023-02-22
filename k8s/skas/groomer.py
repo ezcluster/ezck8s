@@ -46,8 +46,8 @@ def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
     setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE, "skas")
     setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_CHART_URL, "https://github.com/skasproject/warehouse/releases/download/0.1.0/skas-0.1.0.tgz")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE, "skas-users")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_CHART_URL, "https://github.com/skasproject/warehouse/releases/download/0.1.0/users-0.1.0.tgz")
+    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE, "skusers")
+    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_CHART_URL, "https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz")
     setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, "")
 
     if model[CLUSTER][K8S][SKAS][DISABLED]:
