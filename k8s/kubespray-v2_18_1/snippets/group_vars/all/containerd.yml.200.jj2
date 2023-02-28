@@ -33,6 +33,15 @@
 
 # containerd_max_container_log_line_size: -1
 
+{%% if m.cluster.k8s.kubespray.offline.containerd_registry_auth is defined %%}
+containerd_registry_auth:
+{%% for auth in m.cluster.k8s.kubespray.offline.containerd_registry_auth %%}
+- registry: {{{ auth.registry }}}
+  username: {{{ auth.username }}}
+  password: {{{ auth.password }}}
+{%% endfor %%}
+{%% endif %%}
+
 # containerd_registry_auth:
 #   - registry: 10.0.0.2:5000
 #     username: user
