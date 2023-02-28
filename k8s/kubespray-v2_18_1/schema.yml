@@ -65,6 +65,22 @@ mapping:
               "docker_image_repo": { type: str, required: false }
               "github_image_repo": { type: str, required: false }
               "pip_proxy": { type: str, required: false }
+              "containerd_registry_auth":
+                type: seq
+                required: false
+                sequence:
+                  - type: map
+                    mapping:
+                      "registry": { type: str, required: true }
+                      "username": { type: str, required: true }
+                      "password": { type: str, required: true }
+
+
+              # containerd_registry_auth:
+              #   - registry: 10.0.0.2:5000
+              #     username: user
+              #     password: pass
+
 
 
   "roles":
