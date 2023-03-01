@@ -19,59 +19,40 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create metallb namespace
+- name: Create cert-manager namespace
   k8s:
     state: present
     definition:
       api_version: v1
       kind: Namespace
       metadata:
-        name: "{{ metallb_namespace }}"
-        labels:
-          pod-security.kubernetes.io/audit: privileged
-          pod-security.kubernetes.io/enforce: privileged
-          pod-security.kubernetes.io/warn: privileged
+        name: "{{ cert_manager_namespace }}"
   run_once: true
 
 - name: Copy preset file
   template:
-    src: metallb-preset.yaml.j2
-    dest: /tmp/metallb-preset.yaml
+    src: cert-manager-preset.yaml.j2
+    dest: /tmp/cert-manager-preset.yaml
   run_once: true
 
 - name: Apply preset file
   k8s:
     state: present
-    src: "/tmp/metallb-preset.yaml"
+    src: "/tmp/cert-manager-preset.yaml"
   run_once: true
 
 - name: Setup value file
   template:
     src: "values.yaml.j2"
-    dest: /tmp/metallb_values.yaml
+    dest: /tmp/cert_manager_values.yaml
   run_once: true
 
-- name: Copy configuration file
-  template:
-    src: metallb-config.yaml.j2
-    dest: /tmp/metallb-config.yaml
-  run_once: true
 
-- name: Deploy metallb helm chart
+- name: Deploy cert-manager helm chart
   kubernetes.core.helm:
-    release_name: metallb
-    release_namespace: "{{ metallb_namespace }}"
-    chart_ref: "{{ metallb_helm_chart_url }}"
+    release_name: cert-manager
+    release_namespace: "{{ cert_manager_namespace }}"
+    chart_ref: "{{ cert_manager_helm_chart_url }}"
     values_files:
-      - /tmp/metallb_values.yaml
+      - /tmp/cert_manager_values.yaml
   run_once: true
-
-- name: Configure metallb (May wait for the controller webhook to be ready)
-  k8s:
-    state: present
-    src: "/tmp/metallb-config.yaml"
-  run_once: true
-  retries: 30   # NB: May take long time to load image
-  delay: 5
-  register: result
-  until: not result.failed

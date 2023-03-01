@@ -1,20 +1,3 @@
-{% if metallb_relax_psp %}
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: {{ metallb_namespace }}:relax-psp
-  namespace: {{ metallb_namespace }}
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: psp:privileged
-subjects:
-- kind: Group
-  # All authenticated users are allowed to use this.
-  name: system:authenticated
-  apiGroup: rbac.authorization.k8s.io
-{% endif %}
 
 ---
 apiVersion: metallb.io/v1beta1
@@ -52,19 +35,3 @@ spec:
     targetPort: 8443
 {% endif %}
 
-{% if metallb_dockerconfigjson is defined and metallb_dockerconfigjson %}
----
-apiVersion: v1
-kind: Secret
-type: kubernetes.io/dockerconfigjson
-metadata:
-  name: image-pull
-  namespace: {{ metallb_namespace }}
-data:
-  .dockerconfigjson: {{ metallb_dockerconfigjson }}
-
-{% endif %}
-
-
-      
-      

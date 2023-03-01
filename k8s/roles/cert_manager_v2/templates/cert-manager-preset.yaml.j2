@@ -1,0 +1,18 @@
+
+{% if cert_manager_dockerconfigjson is defined and cert_manager_dockerconfigjson %}
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: image-pull
+  namespace: {{ cert_manager_namespace }}
+data:
+  .dockerconfigjson: {{ cert_manager_dockerconfigjson }}
+
+{% endif %}
+
+
+
+      
+      

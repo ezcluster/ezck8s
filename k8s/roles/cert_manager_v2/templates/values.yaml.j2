@@ -1,0 +1,33 @@
+
+
+installCRDs: true
+
+{% if cert_manager_image_prefix is defined and cert_manager_image_prefix %}
+
+image:
+  repository: {{ cert_manager_image_prefix }}quay.io/jetstack/cert-manager-controller
+
+webhook:
+  image:
+    repository: {{ cert_manager_image_prefix }}quay.io/jetstack/cert-manager-webhook
+
+cainjector:
+  image:
+    repository: {{ cert_manager_image_prefix }}quay.io/jetstack/cert-manager-cainjector
+
+acmesolver:
+  image:
+    repository: {{ cert_manager_image_prefix }}quay.io/jetstack/cert-manager-acmesolver
+
+startupapicheck:
+  image:
+    repository: {{ cert_manager_image_prefix }}quay.io/jetstack/cert-manager-ctl
+
+{% endif %}
+
+
+{% if cert_manager_dockerconfigjson is defined and cert_manager_dockerconfigjson %}
+global:
+  imagePullSecrets:
+    - name: image-pull
+{% endif %}

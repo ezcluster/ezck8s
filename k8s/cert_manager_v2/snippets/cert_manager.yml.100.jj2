@@ -1,0 +1,20 @@
+
+- name: Install cert-manager
+  hosts:  kube_control_plane[0]
+  tags: [ "cert_manager", "cert-manager", "addons" ]
+  vars:
+{%% if m.data.cluster_issuers is defined and m.data.cluster_issuers|length > 0 %%}
+    cert_manager_cluster_issuers: 
+    {{{ m.data.cluster_issuers |  to_pretty_yaml | indent(4) }}}
+{%% else %%}
+    cert_manager_cluster_issuers: []
+{%% endif %%}
+    cert_manager_image_prefix: "{{{  m.cluster.k8s.cert_manager.offline.image_prefix  }}}"
+    cert_manager_helm_chart_url: {{{ m.data.repositories.cert_manager.helm_chart_url }}}
+{%% if  m.cluster.k8s.cert_manager.offline.dockerconfigjson is defined and m.cluster.k8s.cert_manager.offline.dockerconfigjson %%}
+    cert_manager_dockerconfigjson: {{{  m.cluster.k8s.cert_manager.offline.dockerconfigjson  }}}
+{%% endif %%}
+  roles:
+  - cert_manager_v2
+  
+     
