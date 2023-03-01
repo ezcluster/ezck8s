@@ -28,3 +28,5 @@ metallb_dashboard_ip: Null
 
 metallb_image_prefix: ""
 
+metallb_dockerconfigjson: Null
+

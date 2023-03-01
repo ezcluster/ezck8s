@@ -51,5 +51,20 @@ spec:
   - port: 443
     targetPort: 8443
 {% endif %}
+
+{% if metallb_dockerconfigjson is defined and metallb_dockerconfigjson %}
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: image-pull
+  namespace: {{ metallb_namespace }}
+data:
+  .dockerconfigjson: {{ metallb_dockerconfigjson }}
+
+{% endif %}
+
+
       
       

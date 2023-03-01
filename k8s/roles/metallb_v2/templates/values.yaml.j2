@@ -1,0 +1,23 @@
+
+{% if metallb_image_prefix is defined and metallb_image_prefix %}
+prometheus:
+  rbacProxy:
+    repository: {{ metallb_image_prefix }}gcr.io/kubebuilder/kube-rbac-proxy
+
+controller:
+  image:
+    repository: {{ metallb_image_prefix }}quay.io/metallb/controller
+
+speaker:
+  image:
+    repository: {{ metallb_image_prefix }}quay.io/metallb/speaker
+  frr:
+    image:
+      repository: {{ metallb_image_prefix }}quay.io/frrouting/frr
+{% endif %}
+
+
+{% if metallb_dockerconfigjson is defined and metallb_dockerconfigjson %}
+imagePullSecrets:
+    - name: image-pull
+{% endif %}
