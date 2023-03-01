@@ -1,0 +1,55 @@
+{% if metallb_relax_psp %}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ metallb_namespace }}:relax-psp
+  namespace: {{ metallb_namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: psp:privileged
+subjects:
+- kind: Group
+  # All authenticated users are allowed to use this.
+  name: system:authenticated
+  apiGroup: rbac.authorization.k8s.io
+{% endif %}
+
+---
+apiVersion: metallb.io/v1beta1
+kind: IPAddressPool
+metadata:
+  name: first-pool
+  namespace: {{ metallb_namespace }}
+spec:
+  addresses:
+{% for range in  metallb_external_ip_ranges %}
+    - {{range.first}}-{{range.last}}
+{%  endfor %}
+---
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: first-pool
+  namespace: {{ metallb_namespace }}
+
+{% if metallb_dashboard_ip is defined and  metallb_dashboard_ip %}
+---
+apiVersion: v1
+kind: Service
+metadata:  
+  namespace: kube-system
+  name: dashboard-lb
+  annotations:
+    metallb.universe.tf/loadBalancerIPs: {{metallb_dashboard_ip }}
+spec:
+  selector:    
+    k8s-app: kubernetes-dashboard
+  type: LoadBalancer
+  ports:
+  - port: 443
+    targetPort: 8443
+{% endif %}
+      
+      

@@ -1,0 +1,20 @@
+
+
+- hosts: kube_control_plane[0]:rancher[0]
+  tags: [ "metallb", "addons" ]
+  vars:
+    metallb_relax_psp: {{{ m.cluster.k8s.metallb.relax_psp }}}
+    metallb_external_ip_ranges:
+{%% for r in m.cluster.k8s.metallb.external_ip_ranges %%}
+      - first: {{{ r.first }}}
+        last: {{{ r.last }}}
+{%% endfor %%}
+    metallb_helm_chart_url: {{{ m.data.repositories.metallb.helm_chart_url }}}
+    metallb_image_prefix: "{{{  m.cluster.k8s.metallb.offline.image_prefix  }}}"
+{%% if  m.cluster.k8s.metallb.dashboard_ip is defined %%}
+    metallb_dashboard_ip: {{{  m.cluster.k8s.metallb.dashboard_ip  }}}
+{%% endif %%}
+  roles:
+  - { role: "metallb_v2" }
+      
+     
