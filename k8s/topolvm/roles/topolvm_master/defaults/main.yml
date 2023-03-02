@@ -16,6 +16,8 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 
+topolvm_namespace: topolvm-system
+
 # Value fine for kubespray clusters
 topolvm_kubectl: /usr/local/bin/kubectl
 
@@ -26,7 +28,9 @@ topolvm_controller_replica_count: 2
 
 topolvm_image_prefix: ""
 
-#topolvm_version: 0.5.1
+topolvm_relax_psp: false
+
+# topolvm_dockerconfigjson:
 
 #topolvm_device_classes: 
 #- allow_volume_expansion: false

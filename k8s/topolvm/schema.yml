@@ -28,6 +28,7 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
+          "relax_psp": { type: bool, required: false }    # Default to false
           "controller_replica_count": { type: int, required: false } # Default to 2
           "device_classes": 
             type: seq
@@ -46,6 +47,7 @@ mapping:
             required: false
             mapping:
               "image_prefix": { type: str, required: false }
+              "dockerconfigjson": { type: str, required: false }
 
 
 

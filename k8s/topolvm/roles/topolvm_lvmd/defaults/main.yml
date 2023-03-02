@@ -16,7 +16,7 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 
-#topolvm_lvmd_tgz_url: https://github.com/topolvm/topolvm/releases/download/v0.5.1/lvmd-0.5.1.tar.gz
+#topolvm_lvmd_tgz_url:
 
 #topolvm_device_classes: 
 #- fstype: xfs

@@ -30,7 +30,7 @@ mapping:
         - type: map
           mapping:
             "repo_id": { type: str, required: True }
-            "version": { type: str, required: True }
+            "version": { type: str, required: False }  # Used by some older version.
             "lvmd_tgz_url": { type: str, required: True }
             "helm_chart_url": { type: str, required: False }    # Not used  by older version
             "vgsd_url": { type: str, required: False }  # Used by some older version.

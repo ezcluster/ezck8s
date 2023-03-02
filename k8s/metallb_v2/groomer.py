@@ -29,9 +29,9 @@ DASHBOARD_IP = "dashboard_ip"
 OFFLINE="offline"
 IMAGE_PREFIX="image_prefix"
 REPO_ID="repo_id"
-DATA="data"
-LOCAL_DNS="local_dns"
-RELAX_PSP="relax_psp"
+DATA = "data"
+LOCAL_DNS = "local_dns"
+RELAX_PSP = "relax_psp"
 
 
 def resolveDnsAndCheckWithLocal(model, addr):

@@ -15,7 +15,6 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
-ingress_nginx_tmp_folder: /tmp/ingress-nginx
 
 ingress_nginx_namespace: ingress-nginx
 

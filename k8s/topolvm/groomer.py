@@ -45,6 +45,7 @@ ALLOW_VOLUME_EXPANSION = "allow_volume_expansion"
 CONTROLLER_REPLICA_COUNT="controller_replica_count"
 OFFLINE="offline"
 IMAGE_PREFIX="image_prefix"
+RELAX_PSP = "relax_psp"
 
 """
 In model[DATA][K8S][TOPOLVM]:
@@ -83,6 +84,7 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][TOPOLVM][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[CLUSTER][K8S][TOPOLVM], RELAX_PSP, False)
         setDefaultInMap(model[CLUSTER][K8S][TOPOLVM], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][TOPOLVM][OFFLINE], IMAGE_PREFIX, "")
 
