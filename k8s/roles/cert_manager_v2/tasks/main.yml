@@ -56,3 +56,15 @@
     values_files:
       - /tmp/cert_manager_values.yaml
   run_once: true
+
+# NB There is a hook in the chart (startupapicheck) which wait for cert-manager to be up and ready
+
+- name: Copy cluster_issuers
+  template:
+    src: cluster_issuers.yaml.j2
+    dest: /tmp/cluster_issuers.yaml
+
+- name: Install cluster_issuers
+  k8s:
+    state: present
+    src: "/tmp/cluster_issuers.yaml"

@@ -1,0 +1,26 @@
+
+
+- hosts: kube_control_plane[0]:rancher[0]
+  tags: [ "ingress", "nginx", "ingress_nginx", "ingressnginx", "ingress-nginx", "addons" ]
+  roles:
+  - role: "ingress_nginx"
+{%% if m.cluster.k8s.ingress_nginx.external_ip is defined %%}
+    ingress_nginx_external_ip: "{{{ m.cluster.k8s.ingress_nginx.external_ip }}}"
+{%% endif %%}
+{%% if m.cluster.k8s.ingress_nginx.http_node_port is defined %%}
+    ingress_nginx_http_node_port: {{{ m.cluster.k8s.ingress_nginx.http_node_port }}}
+{%% endif %%}
+{%% if m.cluster.k8s.ingress_nginx.https_node_port is defined %%}
+    ingress_nginx_https_node_port: {{{ m.cluster.k8s.ingress_nginx.https_node_port }}}
+{%% endif %%}
+{%% if m.cluster.k8s.ingress_nginx.command_line_arguments is defined %%}
+    ingress_nginx_command_line_arguments: {{{ m.cluster.k8s.ingress_nginx.command_line_arguments }}}
+{%% endif %%}
+{%% if m.cluster.k8s.ingress_nginx.dashboard_host is defined %%}
+    ingress_nginx_dashboard_host: {{{ m.cluster.k8s.ingress_nginx.dashboard_host }}}
+{%% endif %%}
+    ingress_nginx_image_prefix: "{{{ m.cluster.k8s.ingress_nginx.offline.image_prefix }}}"
+    ingress_nginx_helm_chart_url: {{{ m.data.repositories.ingress_nginx.helm_chart_url }}}
+{%% if  m.cluster.k8s.ingress_nginx.offline.dockerconfigjson is defined and m.cluster.k8s.ingress_nginx.offline.dockerconfigjson %%}
+    ingress_nginx_dockerconfigjson: {{{ m.cluster.k8s.ingress_nginx.offline.dockerconfigjson }}}
+{%% endif %%}

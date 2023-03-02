@@ -1,0 +1,107 @@
+# Copyright (C) 2023 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+
+# ----------------------------------------- Deployment
+
+- name: Create ingress-nginx namespace
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ ingress_nginx_namespace }}"
+  run_once: true
+
+
+- name: Copy preset file
+  template:
+    src: ingress-nginx-preset.yaml.j2
+    dest: /tmp/ingress-nginx-preset.yaml
+  run_once: true
+
+- name: Apply preset file
+  k8s:
+    state: present
+    src: "/tmp/ingress-nginx-preset.yaml"
+  run_once: true
+
+- name: Setup value file
+  template:
+    src: "values.yaml.j2"
+    dest: /tmp/ingress_nginx_values.yaml
+  run_once: true
+
+- name: Deploy ingress-nginx helm chart
+  kubernetes.core.helm:
+    release_name: ingress-nginx
+    release_namespace: "{{ ingress_nginx_namespace }}"
+    chart_ref: "{{ ingress_nginx_helm_chart_url }}"
+    values_files:
+      - /tmp/ingress_nginx_values.yaml
+  run_once: true
+
+
+- block:
+  # -------------------------------------- LoadBalancer as upfront
+  - name: Generate the LoadBalancer manifest
+    template:
+      src: load_balancer.yaml.j2
+      dest: "/tmp/ingress_nginx_load_balancer.yaml"
+
+  - name: Apply the LoadBalancer manifest
+    k8s:
+      state: present
+      src:  "/tmp/ingress_nginx_load_balancer.yaml"
+  when: ingress_nginx_external_ip is defined
+  run_once: true
+
+- block:
+  # -------------------------------------- NodePort as upfront
+  - name: Generate the NodePort manifest
+    template:
+      src: node_port.yaml.j2
+      dest: "/tmp/ingress_nginx_node_port.yaml"
+
+  - name: Apply the NodePort manifest
+    k8s:
+      state: present
+      src:  "/tmp/ingress_nginx_node_port.yaml"
+  when: (ingress_nginx_http_node_port is defined) or (ingress_nginx_https_node_port is defined)
+  run_once: true
+
+- block:
+  # ------------------------------------- Dashboard manifest
+  - name: Generate the dashboard manifest
+    template:
+      src: dashboard.yaml.j2
+      dest: "/tmp/ingress_nginx_dashboard.yaml"
+
+  # We must retry, waiting for the webhook to be ready
+  - name: Apply the dashboard manifest (May wait for the nginx Webhook ready)
+    k8s:
+      state: present
+      src:  "/tmp/ingress_nginx_dashboard.yaml"
+    retries: 100   # NB: May take long time to load controller image
+    delay: 5
+    register: result
+    until: not result.failed
+  #- debug: var=result
+  when: ingress_nginx_dashboard_host is defined
+  run_once: true

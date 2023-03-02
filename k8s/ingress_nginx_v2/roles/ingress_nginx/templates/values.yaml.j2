@@ -1,0 +1,40 @@
+
+podSecurityPolicy:
+    enabled: true
+
+controller:
+
+{% if ingress_nginx_command_line_arguments is defined %}
+  extraArgs: {{ ingress_nginx_command_line_arguments }}
+{% endif %}
+
+
+{% if ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix %}
+  image:
+    repository: "{{ ingress_nginx_image_prefix }}registry.k8s.io/ingress-nginx/controller"
+    digest: Null
+
+  opentelemetry:
+    image: {{ ingress_nginx_image_prefix }}registry.k8s.io/ingress-nginx/opentelemetry:v20230107-helm-chart-4.4.2-2-g96b3d2165@sha256:331b9bebd6acfcd2d3048abbdd86555f5be76b7e3d0b5af4300b04235c6056c9
+
+  admissionWebhooks:
+    patch:
+      image:
+        repository: {{ ingress_nginx_image_prefix }}registry.k8s.io/ingress-nginx/kube-webhook-certgen
+        digest: Null
+{% endif %}
+
+
+{% if ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix %}
+
+defaultBackend:
+  image:
+    registry: {{ ingress_nginx_image_prefix }}registry.k8s.io
+
+{% endif %}
+
+
+{% if ingress_nginx_dockerconfigjson is defined and ingress_nginx_dockerconfigjson %}
+imagePullSecrets:
+  - name: image-pull
+{% endif %}
