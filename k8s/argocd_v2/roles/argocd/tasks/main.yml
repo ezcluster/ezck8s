@@ -1,0 +1,72 @@
+# Copyright (C) 2023 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+# ----------------------------------------- Deployment
+
+- name: Create argocd namespace
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ argocd_namespace }}"
+  when: argocd_state == 'present'
+
+- name: Copy preset file
+  template:
+    src: argocd-preset.yaml.j2
+    dest: /tmp/argocd-preset.yaml
+  run_once: true
+
+- name: Apply preset file
+  k8s:
+    state: present
+    src: "/tmp/argocd-preset.yaml"
+  run_once: true
+
+- name: Setup value file
+  template:
+    src: "values.yaml.j2"
+    dest: /tmp/argocd_values.yaml
+  run_once: true
+  when: argocd_state == 'present'
+
+- name: Deploy argocd helm chart
+  kubernetes.core.helm:
+    release_state: "{{argocd_state}}"
+    release_name: argocd
+    release_namespace: "{{ argocd_namespace }}"
+    create_namespace: false
+    chart_ref: "{{ argocd_helm_chart_url }}"
+    force: true
+    values_files:
+      - /tmp/argocd_values.yaml
+  run_once: true
+
+# --------------------------------- Cleanup
+
+- name: Remove argocd namespace
+  k8s:
+    state: absent
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ argocd_namespace }}"
+  when: argocd_state == 'absent'

@@ -1,4 +1,10 @@
 
+- hosts: kube_control_plane
+  tags: [ "topolvm", "topolvm_master", "addons" ]
+  vars:
+    topolvm_state: absent
+  roles:
+  - topolvm_scheduler
 
 - hosts: kube_control_plane
   tags: [ "topolvm", "topolvm_master" ]

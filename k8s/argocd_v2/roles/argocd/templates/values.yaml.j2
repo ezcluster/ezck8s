@@ -1,0 +1,37 @@
+
+
+crds:
+  install: {{ argocd_install_crds }}
+
+server:
+{% if argocd_ingress_nginx_host is defined and argocd_ingress_nginx_host %}
+  ingress:
+    enabled: true
+    annotations:
+      cert-manager.io/cluster-issuer: {{ argocd_cluster_issuer }}
+      kubernetes.io/tls-acme: "true"
+      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      nginx.ingress.kubernetes.io/ssl-passthrough: "true"
+    ingressClassName: nginx
+    hosts:
+    - {{ argocd_ingress_nginx_host }}
+    tls:
+    - secretName: argocd-server-tls
+      hosts: # TBD (as list)
+      - {{ argocd_ingress_nginx_host }}
+{% else %}
+  ingress:
+    enabled: false
+{% endif %}
+
+global:
+  image:
+    repository: {{ argocd_image_prefix }}quay.io/argoproj/argocd
+{% if argocd_dockerconfigjson is defined and argocd_dockerconfigjson %}
+  imagePullSecrets:
+  - name: image-pull
+{% endif %}
+
+redis:
+  image:
+    repository: {{ argocd_image_prefix }}public.ecr.aws/docker/library/redis
