@@ -11,8 +11,8 @@
 {%% endif %%}
     cert_manager_image_prefix: "{{{  m.cluster.k8s.cert_manager.offline.image_prefix  }}}"
     cert_manager_helm_chart_url: {{{ m.data.repositories.cert_manager.helm_chart_url }}}
-{%% if  m.cluster.k8s.cert_manager.offline.dockerconfigjson is defined and m.cluster.k8s.cert_manager.offline.dockerconfigjson %%}
-    cert_manager_dockerconfigjson: {{{  m.cluster.k8s.cert_manager.offline.dockerconfigjson  }}}
+{%% if  m.data.repositories.cert_manager.dockerconfigjson is defined %%}
+    cert_manager_dockerconfigjson: {{{  m.data.repositories.cert_manager.dockerconfigjson  }}}
 {%% endif %%}
   roles:
   - cert_manager_v2

@@ -13,7 +13,6 @@
   tags: [ "topolvm", "topolvm_master", "addons" ]
   vars:
     topolvm_state: present
-    topolvm_version: {{{ m.data.repositories.topolvm.version }}}
     topolvm_controller_replica_count: {{{ m.cluster.k8s.topolvm.controller_replica_count }}}
 {%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
     topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
@@ -21,8 +20,8 @@
     topolvm_device_classes: 
 {{{m.cluster.k8s.topolvm.device_classes|to_pretty_yaml|indent(4, first=True) }}}
     topolvm_image_prefix: {{{ m.cluster.k8s.topolvm.offline.image_prefix}}}
-{%% if  m.cluster.k8s.topolvm.offline.dockerconfigjson is defined and m.cluster.k8s.topolvm.offline.dockerconfigjson %%}
-    topolvm_dockerconfigjson: {{{  m.cluster.k8s.topolvm.offline.dockerconfigjson  }}}
+{%% if  m.data.repositories.topolvm.dockerconfigjson is defined %%}
+    topolvm_dockerconfigjson: {{{  m.data.repositories.topolvm.dockerconfigjson  }}}
 {%% endif %%}
     topolvm_relax_psp: {{{  m.cluster.k8s.topolvm.relax_psp  }}}
   roles:
@@ -33,7 +32,6 @@
   tags: [ "topolvm", "topolvm_master", "addons" ]
   vars:
     topolvm_state: present
-    topolvm_version: {{{ m.data.repositories.topolvm.version }}}
   roles:
   - topolvm_scheduler
 

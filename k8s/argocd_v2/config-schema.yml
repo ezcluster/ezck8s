@@ -31,3 +31,4 @@ mapping:
           mapping:
             "repo_id": { type: str, required: True }
             "helm_chart_url": { type: str, required: True }
+            "dockerconfigjson": { type: str, required: false }

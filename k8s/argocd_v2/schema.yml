@@ -35,6 +35,5 @@ mapping:
             required: false
             mapping:
               "image_prefix": { type: str, required: false }
-              "dockerconfigjson": { type: str, required: false }
 
                 

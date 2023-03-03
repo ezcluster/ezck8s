@@ -10,7 +10,6 @@
   tags: [ "topolvm", "topolvm_master" ]
   vars:
     topolvm_state: absent  
-    topolvm_version: {{{ m.data.repositories.topolvm.version }}}
 {%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
     topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
 {%% endif %%}
