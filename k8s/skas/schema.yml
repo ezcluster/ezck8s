@@ -27,13 +27,12 @@ mapping:
         required: true
         mapping:
           "disabled": { type: bool, required: False }
+          "repo_id": { type: str, required: true }
           authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc:7014/v1/tokenReview
           authCertName: { type: str, required: false }      # Default skas-auth-cert
           namespace: { type: str, required: false }         # Default: skas-system
-          helmRelease: { type: str, required: false }       # Default: skas
-          helmChartUrl: { type: str, required: false }      # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/skas-0.1.0.tgz
+          helmReleaseName: { type: str, required: false }       # Default: skas
           helmValues: { type: any, required: true }
-          usersHelmRelease: { type: str, required: false }   # Default: skusers
-          usersHelmChartUrl: { type: str, required: false } # Default: https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz
+          usersHelmReleaseName: { type: str, required: false }   # Default: skusers
           usersHelmValues: { type: any, required: false }    # Default: ""
 

@@ -5,5 +5,9 @@
     skas_deploy_helm_chart: true
     skas_configure_apiserver: true
     skas_state: absent
+    skas_helm_release: {{{ m.cluster.k8s.skas.helmReleaseName }}}
+    skas_helm_chart_url: {{{ m.data.repositories.skas.helm_chart_url}}}
+    skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
+
   roles:
     - skas

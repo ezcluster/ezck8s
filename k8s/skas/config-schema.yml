@@ -1,4 +1,4 @@
-# Copyright (C) 2023 BROADSoftware
+# Copyright (C) 2020 BROADSoftware
 #
 # This file is part of EzCluster
 #
@@ -16,12 +16,19 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 
-skas_users_state: present
 
-skas_namespace: skas-system
-
-skas_users_helm_release: skuser
-skas_users_helm_chart_url: https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz
-
-
-
+type: map
+mapping:
+  "repositories":
+    type: map
+    required: false
+    mapping:
+      "skas":
+        type: seq
+        required: false
+        sequence:
+        - type: map
+          mapping:
+            "repo_id": { type: str, required: True }
+            "helm_chart_url": { type: str, required: True }
+            "users_helm_chart_url": { type: str, required: True }

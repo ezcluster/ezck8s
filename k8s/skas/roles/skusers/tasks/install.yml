@@ -11,10 +11,10 @@
 - name: Deploy skuser helm chart
   kubernetes.core.helm:
     release_state: present
-    release_name: "{{ skas_user_helm_release }}"
+    release_name: "{{ skas_users_helm_release }}"
     release_namespace: "{{ skas_namespace}}"
     create_namespace: false
-    chart_ref: "{{ skas_user_helm_chart_url }}"
+    chart_ref: "{{ skas_users_helm_chart_url }}"
     values_files:
       - /tmp/skas_users_values.yaml
   run_once: true

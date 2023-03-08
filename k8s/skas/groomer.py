@@ -16,7 +16,7 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import os
-from misc import setDefaultInMap
+from misc import setDefaultInMap,lookupRepository
 
 
 CLUSTER = "cluster"
@@ -28,29 +28,28 @@ DISABLED="disabled"
 AUTH_WEBHOOK_URL="authWebhookUrl"
 AUTH_CERT_NAME="authCertName"
 NAMESPACE="namespace"
-HELM_RELEASE="helmRelease"
+HELM_RELEASE_NAME="helmReleaseName"
 HELM_CHART_URL="helmChartUrl"
 HELM_VALUES="helmValues"
-USERS_HELM_RELEASE="usersHelmRelease"
+USERS_HELM_RELEASE_name="usersHelmReleaseName"
 USERS_HELM_CHART_URL="usersHelmChartUrl"
 USERS_HELM_VALUES="usersHelmValues"
-
+REPO_ID="repo_id"
 
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
     setDefaultInMap(model[CLUSTER][K8S], SKAS, {})
     setDefaultInMap(model[CLUSTER][K8S][SKAS], DISABLED, False)
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_WEBHOOK_URL, "https://skas-auth.skas-system.svc:7014/v1/tokenReview")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_CERT_NAME, "skas-auth-cert")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE, "skas")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_CHART_URL, "https://github.com/skasproject/warehouse/releases/download/0.1.0/skas-0.1.0.tgz")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE, "skusers")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_CHART_URL, "https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz")
-    setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, "")
 
     if model[CLUSTER][K8S][SKAS][DISABLED]:
         return False
     else:
+        lookupRepository(model, None, "skas", model[CLUSTER][K8S][SKAS][REPO_ID])
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_WEBHOOK_URL, "https://skas-auth.skas-system.svc:7014/v1/tokenReview")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_CERT_NAME, "skas-auth-cert")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE_NAME, "skas")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE_name, "skusers")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, "")
         return True

@@ -8,8 +8,8 @@
     skas_auth_webhook_url: {{{ m.cluster.k8s.skas.authWebhookUrl }}}
     skas_auth_cert_name: {{{ m.cluster.k8s.skas.authCertName }}}
     skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
-    skas_helm_release: {{{ m.cluster.k8s.skas.helmRelease }}}
-    skas_helm_chart_url: {{{ m.cluster.k8s.skas.helmChartUrl }}}
+    skas_helm_release: {{{ m.cluster.k8s.skas.helmReleaseName }}}
+    skas_helm_chart_url: {{{ m.data.repositories.skas.helm_chart_url }}}
 
     skas_helm_values:
       {{{ m.cluster.k8s.skas.helmValues | to_pretty_yaml | indent(6) }}}
