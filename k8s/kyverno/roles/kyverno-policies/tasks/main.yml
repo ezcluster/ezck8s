@@ -1,0 +1,56 @@
+# Copyright (C) 2023 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+# ----------------------------------------- Deployment (Namespace should have been created by kyverno main playbook)
+
+- name: Setup value file
+  template:
+    src: "values.yaml.j2"
+    dest: /tmp/kyverno_policies_values.yaml
+  run_once: true
+  when: kyverno_policies_state == 'present'
+
+# From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+# The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+# So, we first download the chart localy
+
+- name: Fetch the kyverno_policies chart
+  ansible.builtin.get_url:
+    url: "{{ kyverno_policies_helm_chart_url }}"
+    dest: /tmp/kyverno_policies_chart.tgz
+  when: kyverno_policies_state == 'present'
+
+- name: Deploy kyverno-policies helm chart
+  kubernetes.core.helm:
+    release_state: "{{kyverno_policies_state}}"
+    release_name: kyverno-policies
+    release_namespace: "{{ kyverno_policies_namespace }}"
+    create_namespace: false
+    chart_ref: /tmp/kyverno_policies_chart.tgz
+    force: true
+    values_files:
+      - /tmp/kyverno_policies_values.yaml
+  run_once: true
+
+## We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+#- name: Deploy kyverno_policies helm chart
+#  shell: helm -n "{{ kyverno_policies_namespace }}" upgrade -i kyverno_policies --values /tmp/kyverno_policies_values "{{ kyverno_policies_helm_chart_url }}"
+#  args:
+#    chdir: /tmp
+#  run_once: true
+#  when: kyverno_policies_state == 'present'

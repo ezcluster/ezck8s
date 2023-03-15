@@ -1,0 +1,16 @@
+
+- hosts: kube_control_plane[0]
+  tags: [ "kyverno", "addons" ]
+  vars:
+    kyverno_namespace: kyverno
+    kyverno_policies_state: absent
+  roles:
+  - kyverno-policies
+
+- hosts: kube_control_plane[0]
+  tags: [ "kyverno", "addons" ]
+  vars:
+    kyverno_namespace: kyverno
+    kyverno_state: absent
+  roles:
+  - kyverno

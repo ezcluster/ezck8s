@@ -1,0 +1,4 @@
+
+- name: Install kyverno
+  import_playbook: kyverno.yml
+     

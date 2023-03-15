@@ -20,21 +20,19 @@ from misc import setDefaultInMap,lookupRepository
 
 
 CLUSTER = "cluster"
-DATA="data"
-K8S="k8s"
-SKAS="skas"
-DISABLED="disabled"
+DATA = "data"
+K8S = "k8s"
+SKAS = "skas"
+DISABLED = "disabled"
 
-AUTH_WEBHOOK_URL="authWebhookUrl"
-AUTH_CERT_NAME="authCertName"
-NAMESPACE="namespace"
-HELM_RELEASE_NAME="helmReleaseName"
-HELM_CHART_URL="helmChartUrl"
-HELM_VALUES="helmValues"
-USERS_HELM_RELEASE_name="usersHelmReleaseName"
-USERS_HELM_CHART_URL="usersHelmChartUrl"
-USERS_HELM_VALUES="usersHelmValues"
-REPO_ID="repo_id"
+AUTH_WEBHOOK_URL = "authWebhookUrl"
+AUTH_CERT_NAME = "authCertName"
+NAMESPACE = "namespace"
+HELM_RELEASE_NAME = "helmReleaseName"
+HELM_VALUES = "helmValues"
+USERS_HELM_RELEASE_name = "usersHelmReleaseName"
+USERS_HELM_VALUES = "usersHelmValues"
+REPO_ID = "repo_id"
 
 
 def groom(_plugin, model):

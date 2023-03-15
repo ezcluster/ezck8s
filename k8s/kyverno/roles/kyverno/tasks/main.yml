@@ -1,0 +1,79 @@
+# Copyright (C) 2023 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+# ----------------------------------------- Deployment
+
+- name: Create kyverno namespace
+  k8s:
+    state: present
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ kyverno_namespace }}"
+  when: kyverno_state == 'present'
+
+- name: Setup value file
+  template:
+    src: "values.yaml.j2"
+    dest: /tmp/kyverno_values.yaml
+  run_once: true
+  when: kyverno_state == 'present'
+
+# From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+# The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+# So, we first download the chart localy
+
+- name: Fetch the kyverno chart
+  ansible.builtin.get_url:
+    url: "{{ kyverno_helm_chart_url }}"
+    dest: /tmp/kyverno_chart.tgz
+  when: kyverno_state == 'present'
+
+- name: Deploy kyverno helm chart
+  kubernetes.core.helm:
+    release_state: "{{kyverno_state}}"
+    release_name: kyverno
+    release_namespace: "{{ kyverno_namespace }}"
+    create_namespace: false
+    chart_ref: /tmp/kyverno_chart.tgz
+    force: true
+    values_files:
+      - /tmp/kyverno_values.yaml
+  run_once: true
+
+## We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+#- name: Deploy kyverno helm chart
+#  shell: helm -n "{{ kyverno_namespace }}" upgrade -i kyverno --values /tmp/kyverno_values "{{ kyverno_helm_chart_url }}"
+#  args:
+#    chdir: /tmp
+#  run_once: true
+#  when: kyverno_state == 'present'
+
+# --------------------------------- Cleanup
+
+- name: Remove kyverno namespace
+  k8s:
+    state: absent
+    definition:
+      api_version: v1
+      kind: Namespace
+      metadata:
+        name: "{{ argocd_namespace }}"
+  when: kyverno_state == 'absent'
+
