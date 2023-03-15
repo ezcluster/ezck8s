@@ -7,7 +7,6 @@
 
 - import_playbook: {{{ m.data.helpers.kubespray.folder }}}/cluster.yml
 
-
 {%% if 'docker_certificates' in m.data and m.data.docker_certificates|length > 0 %%}
 - hosts: kube_node
   tags: [ "docker_certificates" ]
@@ -42,18 +41,20 @@
 {%% endif %%}
 
     
-- hosts:  kube_control_plane[0]
-  tags: [ "node_labels", "node_taints" ]
+- hosts:  kube_control_plane
+  tags: [ "openshift" ]
   tasks:
   - name: Install k8s ansible module required package (Redhat)
     yum: name=python2-openshift state=present
     when: ansible_os_family == "RedHat"
   - name: Install k8s ansible module required package (Debian)
     block:
-      - apt:
+      - name: Install python3-pip with apt
+        ansible.builtin.apt:
           name: python3-pip
           state: present
-      - pip:
+      - name: Pip install k8s required modules
+        ansible.builtin.pip:
           name:
             - openshift==0.13.1
             - pyyaml==5.3.1
@@ -61,7 +62,16 @@
            # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
            # For example, kubernetes==25.3.0 will fail for next step in such context:
            # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
+{%% if m.cluster.k8s.kubespray.offline.pip_proxy is defined %%}
+          extra_args: "--proxy {{{ m.cluster.k8s.kubespray.offline.pip_proxy }}}"
+{%% endif %%}
     when: ansible_os_family == "Debian"
+
+
+
+- hosts:  kube_control_plane[0]
+  tags: [ "node_labels", "node_taints" ]
+  tasks:
 {%%- for role in m.cluster.roles %%}
 {%%- if role.k8s is defined and (role.k8s.node_labels is defined or role.k8s.node_taints is defined) %%}    
   - name: Set Node label and taint for role {{{role.name}}}
@@ -124,14 +134,15 @@
 {%% endif %%}
     tags: [ "proxy", "http_proxy", "master_root_http_proxy" ]      
 {%% endif %%}
+
 {%% if m.data.repositories.k9s is defined or m.data.repositories.helm is defined %%}    
   roles:
 {%% endif %%}    
 {%% if m.data.repositories.k9s is defined %%}    
-  - { role: k9s,  tags: [ "client", "k9s" ], k9s_tgz_url: "{{{ m.data.repositories.k9s.k9s_tgz_url}}}" }
+  - { role: k9s,  tags: [ "client", "k9s", "addons" ], k9s_tgz_url: "{{{ m.data.repositories.k9s.k9s_tgz_url}}}" }
 {%% endif %%}    
 {%% if m.data.repositories.helm is defined %%}    
-  - { role: helm,  tags: [ "client", "helm" ], helm_tgz_url: "{{{ m.data.repositories.helm.helm_tgz_url}}}" }
+  - { role: helm,  tags: [ "client", "helm", "addons" ], helm_tgz_url: "{{{ m.data.repositories.helm.helm_tgz_url}}}" }
 {%% endif %%}    
     
     

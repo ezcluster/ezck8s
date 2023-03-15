@@ -26,7 +26,6 @@ DATA = "data"
 ROLE_PATHS = "rolePaths"
 CONFIG_FILE = "configFile"
 CLUSTER = "cluster"
-DOCKER_CERTIFICATES = "docker_certificates"
 DISABLED = "disabled"
 CLUSTER_NAME = "cluster_name"
 K9S_REPO_ID = "k9s_repo_id"
@@ -37,6 +36,8 @@ AUDIT = "audit"
 POD_SECURITY_POLICIES = "pod_security_policies"
 REPOSITORIES = "repositories"
 DASHBOARD = "dashboard"
+OFFLINE="offline"
+DNS_DOMAIN="dns_domain"
 
 
 def groom(_plugin, model):
@@ -47,7 +48,10 @@ def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], METRICS_SERVER, True)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], AUDIT, False)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DASHBOARD, False)
-    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], POD_SECURITY_POLICIES, True)
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], OFFLINE, {})
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], POD_SECURITY_POLICIES, False)
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DNS_DOMAIN, "cluster.local")
+
     if model[CLUSTER][K8S][KUBESPRAY][DISABLED]:
         return False
     else:
@@ -62,27 +66,6 @@ def groom(_plugin, model):
         lookupHttpProxy(model, model[CLUSTER][K8S][KUBESPRAY]["docker_proxy_id"] if "docker_proxy_id" in model[CLUSTER][K8S][KUBESPRAY] else None, "docker")
         lookupHttpProxy(model, model[CLUSTER][K8S][KUBESPRAY]["master_root_proxy_id"] if "master_root_proxy_id" in model[CLUSTER][K8S][KUBESPRAY] else None, "master_root")
         lookupHttpProxy(model, model[CLUSTER][K8S][KUBESPRAY]["yumproxy_id"] if "yum_proxy_id" in model[CLUSTER][K8S][KUBESPRAY] else None, "yum")
-        if FILES_REPO_ID in model[CLUSTER][K8S][KUBESPRAY]:
-            lookupRepository(model, "kubespray_files", repoId=model[CLUSTER][K8S][KUBESPRAY][FILES_REPO_ID])
         model[DATA][ROLE_PATHS].add(appendPath(model[DATA][HELPERS][KUBESPRAY][FOLDER], "roles"))
-        model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][CLUSTER_NAME].count(".") + 1
-        certByName = {}
-        if DOCKER_CERTIFICATES in model["config"]:
-            for cert in model["config"][DOCKER_CERTIFICATES]:
-                cert["path"] = appendPath(os.path.dirname(model[DATA][CONFIG_FILE]), cert["path"])
-                if not os.path.isfile(cert["path"]) or not os.access(cert["path"], os.R_OK):
-                    ERROR("Configuration error: docker_certificates.{}: Invalid path '{}'".format(cert["name"], cert["path"]))
-                certByName[cert["name"]] = cert
-        model[DATA][DOCKER_CERTIFICATES] = []
-        if DOCKER_CERTIFICATES in model[CLUSTER][K8S][KUBESPRAY]:
-            for certName in model[CLUSTER][K8S][KUBESPRAY][DOCKER_CERTIFICATES]:
-                if certName in certByName:
-                    cert = certByName[certName]
-                    if "port" in cert:
-                        cert["endpoint"] = "{}:{}".format(cert["host"], cert['port'])
-                    else:
-                        cert["endoint"] = cert["host"]
-                    model[DATA][DOCKER_CERTIFICATES].append(cert)
-                else:
-                    ERROR("docker_certificates '{}' is not defined in configuration file!".format(certName))
+        model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][DNS_DOMAIN].count(".") + 1
         return True
