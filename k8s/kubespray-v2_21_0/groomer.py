@@ -39,6 +39,10 @@ DASHBOARD = "dashboard"
 OFFLINE="offline"
 DNS_DOMAIN="dns_domain"
 
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+IMAGE_PREFIX = "image_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
+CONFIG = "config"
 
 def groom(_plugin, model):
     setDefaultInMap(model[DATA], K8S, {})
@@ -68,4 +72,9 @@ def groom(_plugin, model):
         lookupHttpProxy(model, model[CLUSTER][K8S][KUBESPRAY]["yumproxy_id"] if "yum_proxy_id" in model[CLUSTER][K8S][KUBESPRAY] else None, "yum")
         model[DATA][ROLE_PATHS].add(appendPath(model[DATA][HELPERS][KUBESPRAY][FOLDER], "roles"))
         model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][DNS_DOMAIN].count(".") + 1
+
+        model[DATA][K8S][PULL_SECRET_BY_PREFIX] = {}
+        for x in model[CONFIG][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][PULL_SECRET_BY_PREFIX][x[IMAGE_PREFIX]] = x[DOCKERCONFIGJSON]
+
         return True

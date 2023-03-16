@@ -6,4 +6,22 @@ extraArgs:
   - --exceptionNamespace={{ kyverno_namespace }}
   - --enablePolicyException=true
 
+image:
+  repository: {{ kyverno_image_prefix }}ghcr.io/kyverno/kyverno
+{% if kyverno_dockerconfigjson is defined and kyverno_dockerconfigjson %}
+  pullSecrets:
+    - name: image-pull
+{% endif %}
 
+cleanupController:
+  image:
+    repository: {{ kyverno_image_prefix }}ghcr.io/kyverno/cleanup-controller
+{% if kyverno_dockerconfigjson is defined and kyverno_dockerconfigjson %}
+    pullSecrets:
+      - name: image-pull
+{% endif %}
+
+{% if kyverno_dockerconfigjson is defined and kyverno_dockerconfigjson %}
+existingImagePullSecrets:
+  - image-pull
+{% endif %}

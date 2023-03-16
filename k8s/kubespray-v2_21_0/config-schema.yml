@@ -53,6 +53,14 @@ mapping:
             "repo_id": { type: str, required: True }
             "version": { type: str, required: False }
             "helm_tgz_url": { type: str, required: True }
+  "pull_secret_by_prefix":
+    type: seq
+    required: false
+    sequence:
+      - type: map
+        mapping:
+          "image_prefix": { type: str, required: True }
+          "dockerconfigjson": { type: str, required: True }
 
             
             

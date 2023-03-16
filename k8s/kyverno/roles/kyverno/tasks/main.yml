@@ -28,6 +28,18 @@
         name: "{{ kyverno_namespace }}"
   when: kyverno_state == 'present'
 
+- name: Copy preset file
+  template:
+    src: kyverno-preset.yaml.j2
+    dest: /tmp/kyverno-preset.yaml
+  run_once: true
+
+- name: Apply preset file
+  k8s:
+    state: present
+    src: "/tmp/kyverno-preset.yaml"
+  run_once: true
+
 - name: Setup value file
   template:
     src: "values.yaml.j2"
@@ -74,6 +86,6 @@
       api_version: v1
       kind: Namespace
       metadata:
-        name: "{{ argocd_namespace }}"
+        name: "{{ kyverno_namespace }}"
   when: kyverno_state == 'absent'
 

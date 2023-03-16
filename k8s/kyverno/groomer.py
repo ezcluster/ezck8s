@@ -16,8 +16,8 @@
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
 import os
+import logging
 from misc import setDefaultInMap, lookupRepository
-
 
 CLUSTER = "cluster"
 DATA = "data"
@@ -28,6 +28,11 @@ DISABLED = "disabled"
 NAMESPACE = "namespace"
 POLICIES_HELM_VALUES = "policiesHelmValues"
 REPO_ID = "repo_id"
+CONFIG = "config"
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+IMAGE_PREFIX = "image_prefix"
+OFFLINE = "offline"
+DOCKERCONFIGJSON = "dockerconfigjson"
 
 
 def groom(_plugin, model):
@@ -37,7 +42,14 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][KYVERNO][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[DATA], K8S, {})
+        setDefaultInMap(model[DATA][K8S], KYVERNO, {})
+        setDefaultInMap(model[CLUSTER][K8S][KYVERNO], OFFLINE, {})
+        setDefaultInMap(model[CLUSTER][K8S][KYVERNO][OFFLINE], IMAGE_PREFIX, "")
         lookupRepository(model, None, "kyverno", model[CLUSTER][K8S][KYVERNO][REPO_ID])
         setDefaultInMap(model[CLUSTER][K8S][KYVERNO], NAMESPACE, "kyverno")
         setDefaultInMap(model[CLUSTER][K8S][KYVERNO], POLICIES_HELM_VALUES, "")
+        image_prefix = model[CLUSTER][K8S][KYVERNO][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][KYVERNO][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
         return True

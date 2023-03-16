@@ -1,0 +1,18 @@
+
+{% if kyverno_dockerconfigjson is defined and kyverno_dockerconfigjson %}
+---
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/dockerconfigjson
+metadata:
+  name: image-pull
+  namespace: {{ kyverno_namespace }}
+data:
+  .dockerconfigjson: {{ kyverno_dockerconfigjson }}
+
+{% endif %}
+
+
+
+      
+      

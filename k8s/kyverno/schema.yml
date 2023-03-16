@@ -30,3 +30,8 @@ mapping:
           "repo_id": { type: str, required: true }
           "namespace": { type: str, required: false }         # Default: kiverno
           "policiesHelmValues": { type: any, required: false }    # Default: ""
+          "offline":
+            type: map
+            required: false
+            mapping:
+              "image_prefix": { type: str, required: false }
