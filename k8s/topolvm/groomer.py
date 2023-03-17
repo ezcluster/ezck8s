@@ -42,10 +42,14 @@ DEVICE = "device"
 NODE_BY_NAME = "nodeByName"
 NODES = "nodes"
 ALLOW_VOLUME_EXPANSION = "allow_volume_expansion"
-CONTROLLER_REPLICA_COUNT="controller_replica_count"
-OFFLINE="offline"
-IMAGE_PREFIX="image_prefix"
+CONTROLLER_REPLICA_COUNT = "controller_replica_count"
+OFFLINE = "offline"
+IMAGE_PREFIX = "image_prefix"
 RELAX_PSP = "relax_psp"
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
+
+
 
 """
 In model[DATA][K8S][TOPOLVM]:
@@ -138,4 +142,7 @@ def groom(_plugin, model):
             if nodeName in model[DATA][K8S][TOPOLVM][VOLUME_GROUP_BY_NODE]:
                 for vg in model[DATA][K8S][TOPOLVM][VOLUME_GROUP_BY_NODE][nodeName]:
                     print("\t{}:{} -> {}GB".format(nodeName, vg[NAME], vg[SIZE]))
+        image_prefix = model[CLUSTER][K8S][TOPOLVM][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][TOPOLVM][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
         return True

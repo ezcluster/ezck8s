@@ -51,48 +51,64 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create topolvm namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ topolvm_namespace }}"
-        labels:
-          topolvm.cybozu.com/webhook: ignore
+- block:
+  - name: Create topolvm namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ topolvm_namespace }}"
+          labels:
+            topolvm.cybozu.com/webhook: ignore
+
+  - name: Copy preset file
+    template:
+      src: topolvm-preset.yaml.j2
+      dest: /tmp/topolvm-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/topolvm-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/topolvm_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the topolvm chart
+    ansible.builtin.get_url:
+      url: "{{ topolvm_helm_chart_url }}"
+      dest: /tmp/topolvm_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy topolvm helm chart
+    shell: helm -n "{{ topolvm_namespace }}" upgrade -i topolvm --values /tmp/topolvm_values.yaml /tmp/topolvm_chart.tgz
+    args:
+      chdir: /tmp
+    run_once: true
+
+  #- name: Deploy topolvm helm chart
+  #  kubernetes.core.helm:
+  #    release_state: "{{topolvm_state}}"
+  #    release_name: topolvm
+  #    release_namespace: "{{ topolvm_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: "{{ topolvm_helm_chart_url }}"
+  #    force: true
+  #    values_files:
+  #      - /tmp/topolvm_values.yaml
+  #  run_once: true
+  run_once: true
   when: topolvm_state == 'present'
 
-- name: Copy preset file
-  template:
-    src: topolvm-preset.yaml.j2
-    dest: /tmp/topolvm-preset.yaml
-  run_once: true
 
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/topolvm-preset.yaml"
-  run_once: true
-
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/topolvm_values.yaml
-  run_once: true
-  when: topolvm_state == 'present'
-
-- name: Deploy topolvm helm chart
-  kubernetes.core.helm:
-    release_state: "{{topolvm_state}}"
-    release_name: topolvm
-    release_namespace: "{{ topolvm_namespace }}"
-    create_namespace: false
-    chart_ref: "{{ topolvm_helm_chart_url }}"
-    force: true
-    values_files:
-      - /tmp/topolvm_values.yaml
-  run_once: true
 
 # ---- Patch imagePullSecret in deployment
 
@@ -116,16 +132,24 @@
   when: topolvm_state == 'present' and topolvm_dockerconfigjson is defined and topolvm_dockerconfigjson
   run_once: true
 
-
-
 # --------------------------------- Cleanup
 
-- name: Remove topolvm namespace
-  k8s:
-    state: absent
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ topolvm_namespace }}"
+- block:
+
+  - name: Remove topolvm helm chart
+    shell: helm -n "{{ topolvm_namespace }}" uninstall topolvm
+    args:
+      chdir: /tmp
+
+  - name: Remove topolvm namespace
+    k8s:
+      state: absent
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ topolvm_namespace }}"
+
+  run_once: true
   when: topolvm_state == 'absent'
+

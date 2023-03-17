@@ -1,0 +1,12 @@
+
+- hosts: kube_control_plane[0]
+  tags: [ "kyverno", "addons", "kyverno_policies", "kyverno-policies" ]
+  vars:
+    kyverno_state: present
+    kyverno_namespace: {{{ m.cluster.k8s.kyverno.namespace }}}
+    kyverno_policies_helm_chart_url: {{{ m.data.repositories.kyverno.policies_helm_chart_url }}}
+    kyverno_policies_helm_values:
+      {{{ m.cluster.k8s.kyverno.policiesHelmValues | to_pretty_yaml | indent(6) }}}
+    kyverno_image_prefix: "{{{ m.cluster.k8s.kyverno.offline.image_prefix }}}"
+  roles:
+  - kyverno-policies

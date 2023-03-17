@@ -19,9 +19,9 @@
 {%% endif %%}
     topolvm_device_classes: 
 {{{m.cluster.k8s.topolvm.device_classes|to_pretty_yaml|indent(4, first=True) }}}
-    topolvm_image_prefix: {{{ m.cluster.k8s.topolvm.offline.image_prefix}}}
-{%% if  m.data.repositories.topolvm.dockerconfigjson is defined %%}
-    topolvm_dockerconfigjson: {{{  m.data.repositories.topolvm.dockerconfigjson  }}}
+    topolvm_image_prefix: "{{{ m.cluster.k8s.topolvm.offline.image_prefix}}}"
+{%% if  m.data.k8s.topolvm.dockerconfigjson is defined %%}
+    topolvm_dockerconfigjson: {{{  m.data.k8s.topolvm.dockerconfigjson  }}}
 {%% endif %%}
     topolvm_relax_psp: {{{  m.cluster.k8s.topolvm.relax_psp  }}}
   roles:

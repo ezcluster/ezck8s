@@ -33,6 +33,8 @@ LOCAL_DNS = "local_dns"
 OFFLINE = "offline"
 IMAGE_PREFIX = "image_prefix"
 REPO_ID = "repo_id"
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
 
 
 def resolveDnsAndCheckWithLocal(model, addr):
@@ -55,6 +57,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][ARGOCD][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[DATA], K8S, {})
+        setDefaultInMap(model[DATA][K8S], ARGOCD, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][OFFLINE], IMAGE_PREFIX, "")
         lookupRepository(model, None, "argocd", model[CLUSTER][K8S][ARGOCD][REPO_ID])
@@ -70,5 +74,9 @@ def groom(_plugin, model):
                         ERROR("k8s.argocd: 'ingress_nginx_host' and 'ingress_nginx.external_ip' must resolve on same ip ({} != {})".format(argocd_ip, ingress_ip))
                 else:
                     logger.warning("Unable to resolve '{}' for now. May be this DNS entry will be created later.".format(model[CLUSTER][K8S][ARGOCD][INGRESS_NGINX_HOST]))
+
+        image_prefix = model[CLUSTER][K8S][ARGOCD][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][ARGOCD][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
 
         return True

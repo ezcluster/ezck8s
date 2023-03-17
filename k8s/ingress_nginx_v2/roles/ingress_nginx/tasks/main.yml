@@ -19,58 +19,71 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create ingress-nginx namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ ingress_nginx_namespace }}"
-  run_once: true
-
-
-- name: Copy preset file
-  template:
-    src: ingress-nginx-preset.yaml.j2
-    dest: /tmp/ingress-nginx-preset.yaml
-  run_once: true
-
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/ingress-nginx-preset.yaml"
-  run_once: true
-
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/ingress_nginx_values.yaml
-  run_once: true
-
-- name: Deploy ingress-nginx helm chart
-  kubernetes.core.helm:
-    release_name: ingress-nginx
-    release_namespace: "{{ ingress_nginx_namespace }}"
-    chart_ref: "{{ ingress_nginx_helm_chart_url }}"
-    values_files:
-      - /tmp/ingress_nginx_values.yaml
-  run_once: true
-
-
 - block:
-  # -------------------------------------- LoadBalancer as upfront
-  - name: Generate the LoadBalancer manifest
-    template:
-      src: load_balancer.yaml.j2
-      dest: "/tmp/ingress_nginx_load_balancer.yaml"
-
-  - name: Apply the LoadBalancer manifest
+  - name: Create ingress-nginx namespace
     k8s:
       state: present
-      src:  "/tmp/ingress_nginx_load_balancer.yaml"
-  when: ingress_nginx_external_ip is defined
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ ingress_nginx_namespace }}"
+
+  - name: Copy preset file
+    template:
+      src: ingress-nginx-preset.yaml.j2
+      dest: /tmp/ingress-nginx-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/ingress-nginx-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/ingress_nginx_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy and install by helm shell command
+
+  - name: Fetch the ingress-nginx chart
+    ansible.builtin.get_url:
+      url: "{{ ingress_nginx_helm_chart_url }}"
+      dest: /tmp/ingress_nginx_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy ingress_nginx helm chart
+    shell: helm -n "{{ ingress_nginx_namespace }}" upgrade -i ingress-nginx --values /tmp/ingress_nginx_values.yaml /tmp/ingress_nginx_chart.tgz
+    args:
+      chdir: /tmp
+
+  #- name: Deploy ingress-nginx helm chart
+  #  kubernetes.core.helm:
+  #    release_name: ingress-nginx
+  #    release_namespace: "{{ ingress_nginx_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: /tmp/ingress_nginx_chart.tgz
+  #    values_files:
+  #      - /tmp/ingress_nginx_values.yaml
+  #  run_once: true
   run_once: true
+
+
+#- block:
+#  # -------------------------------------- LoadBalancer as upfront
+#  - name: Generate the LoadBalancer manifest
+#    template:
+#      src: load_balancer.yaml.j2
+#      dest: "/tmp/ingress_nginx_load_balancer.yaml"
+#
+#  - name: Apply the LoadBalancer manifest
+#    k8s:
+#      state: present
+#      src:  "/tmp/ingress_nginx_load_balancer.yaml"
+#  when: ingress_nginx_external_ip is defined
+#  run_once: true
 
 - block:
   # -------------------------------------- NodePort as upfront

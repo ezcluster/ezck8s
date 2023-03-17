@@ -21,6 +21,6 @@
 {%% endif %%}
     ingress_nginx_image_prefix: "{{{ m.cluster.k8s.ingress_nginx.offline.image_prefix }}}"
     ingress_nginx_helm_chart_url: {{{ m.data.repositories.ingress_nginx.helm_chart_url }}}
-{%% if  m.data.repositories.ingress_nginx.dockerconfigjson is defined  %%}
-    ingress_nginx_dockerconfigjson: {{{ m.data.repositories.ingress_nginx.dockerconfigjson }}}
+{%% if  m.data.k8s.ingress_nginx.dockerconfigjson is defined  %%}
+    ingress_nginx_dockerconfigjson: {{{ m.data.k8s.ingress_nginx.dockerconfigjson }}}
 {%% endif %%}

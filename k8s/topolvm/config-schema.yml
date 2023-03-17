@@ -34,4 +34,3 @@ mapping:
             "lvmd_tgz_url": { type: str, required: True }
             "helm_chart_url": { type: str, required: False }    # Not used  by older version
             "vgsd_url": { type: str, required: False }  # Used by some older version.
-            "dockerconfigjson": { type: str, required: false }

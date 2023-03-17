@@ -11,6 +11,6 @@
 {%% endif %%}
     argocd_image_prefix: "{{{ m.cluster.k8s.argocd.offline.image_prefix }}}"
     argocd_helm_chart_url: {{{ m.data.repositories.argocd.helm_chart_url }}}
-{%% if  m.data.repositories.argocd.dockerconfigjson is defined %%}
-    argocd_dockerconfigjson: {{{  m.data.repositories.argocd.dockerconfigjson  }}}
+{%% if  m.data.k8s.argocd.dockerconfigjson is defined %%}
+    argocd_dockerconfigjson: {{{  m.data.k8s.argocd.dockerconfigjson  }}}
 {%% endif %%}

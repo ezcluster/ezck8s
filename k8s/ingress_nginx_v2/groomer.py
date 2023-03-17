@@ -31,6 +31,8 @@ COMMAND_LINE_ARGUMENTS = "command_line_arguments"
 OFFLINE = "offline"
 IMAGE_PREFIX = "image_prefix"
 REPO_ID = "repo_id"
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
 
 
 DATA="data"
@@ -58,6 +60,9 @@ def groom(_plugin, model):
     else:
         setDefaultInMap(model[CLUSTER][K8S][INGRESS_NGINX], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][INGRESS_NGINX][OFFLINE], IMAGE_PREFIX, "")
+        setDefaultInMap(model[DATA], K8S, {})
+        setDefaultInMap(model[DATA][K8S], INGRESS_NGINX, {})
+
         lookupRepository(model, None, "ingress_nginx", model[CLUSTER][K8S][INGRESS_NGINX][REPO_ID])
 
         if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
@@ -76,4 +81,7 @@ def groom(_plugin, model):
                         enableSslPassthrough = True
             if not enableSslPassthrough:
                 ERROR("k8s.ingress_nginx: Dashbaord access require '--enable-ssl-passthrough' command line argument to be defined")
+        image_prefix = model[CLUSTER][K8S][INGRESS_NGINX][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][INGRESS_NGINX][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
         return True

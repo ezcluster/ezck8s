@@ -19,57 +19,70 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create metallb namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ metallb_namespace }}"
-        labels:
-          pod-security.kubernetes.io/audit: privileged
-          pod-security.kubernetes.io/enforce: privileged
-          pod-security.kubernetes.io/warn: privileged
-  run_once: true
+- block:
+  - name: Create metallb namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ metallb_namespace }}"
+          labels:
+            pod-security.kubernetes.io/audit: privileged
+            pod-security.kubernetes.io/enforce: privileged
+            pod-security.kubernetes.io/warn: privileged
 
-- name: Copy preset file
-  template:
-    src: metallb-preset.yaml.j2
-    dest: /tmp/metallb-preset.yaml
-  run_once: true
+  - name: Copy preset file
+    template:
+      src: metallb-preset.yaml.j2
+      dest: /tmp/metallb-preset.yaml
 
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/metallb-preset.yaml"
-  run_once: true
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/metallb-preset.yaml"
 
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/metallb_values.yaml
-  run_once: true
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/metallb_values.yaml
 
-- name: Copy configuration file
-  template:
-    src: metallb-config.yaml.j2
-    dest: /tmp/metallb-config.yaml
-  run_once: true
+  - name: Copy configuration file
+    template:
+      src: metallb-config.yaml.j2
+      dest: /tmp/metallb-config.yaml
 
-- name: Deploy metallb helm chart
-  kubernetes.core.helm:
-    release_name: metallb
-    release_namespace: "{{ metallb_namespace }}"
-    chart_ref: "{{ metallb_helm_chart_url }}"
-    values_files:
-      - /tmp/metallb_values.yaml
+    # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the metallb chart
+    ansible.builtin.get_url:
+      url: "{{ metallb_helm_chart_url }}"
+      dest: /tmp/metallb_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy metallb helm chart
+    shell: helm -n "{{ metallb_namespace }}" upgrade -i metallb --values /tmp/metallb_values.yaml /tmp/metallb_chart.tgz
+    args:
+      chdir: /tmp
+
+  #- name: Deploy metallb helm chart
+  #  kubernetes.core.helm:
+  #    release_name: metallb
+  #    release_namespace: "{{ metallb_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: /tmp/metallb_chart.tgz
+  #    values_files:
+  #      - /tmp/metallb_values.yaml
+  #  run_once: true
   run_once: true
 
 - name: Configure metallb (May wait for the controller webhook to be ready)
   k8s:
     state: present
-    src: "/tmp/metallb-config.yaml"
+    src: /tmp/metallb-config.yaml
   run_once: true
   retries: 30   # NB: May take long time to load image
   delay: 5

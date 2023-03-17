@@ -3,6 +3,11 @@ podSecurityPolicy:
     enabled: true
 
 controller:
+  service:
+    enabled: true
+    annotations:
+      metallb.universe.tf/loadBalancerIPs: {{ingress_nginx_external_ip}}
+      metallb.universe.tf/allow-shared-ip: "ingress"
 
 {% if ingress_nginx_command_line_arguments is defined %}
   extraArgs: {{ ingress_nginx_command_line_arguments }}

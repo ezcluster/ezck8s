@@ -18,39 +18,48 @@
 
 # ----------------------------------------- Deployment (Namespace should have been created by kyverno main playbook)
 
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/kyverno_policies_values.yaml
+- block:
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/kyverno_policies_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the kyverno_policies chart
+    ansible.builtin.get_url:
+      url: "{{ kyverno_policies_helm_chart_url }}"
+      dest: /tmp/kyverno_policies_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy kyverno_policies helm chart
+    shell: helm -n "{{ kyverno_namespace }}" upgrade -i kyverno-policies --values /tmp/kyverno_policies_values.yaml /tmp/kyverno_policies_chart.tgz
+    args:
+      chdir: /tmp
+
   run_once: true
   when: kyverno_policies_state == 'present'
 
-# From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
-# The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
-# So, we first download the chart localy
 
-- name: Fetch the kyverno_policies chart
-  ansible.builtin.get_url:
-    url: "{{ kyverno_policies_helm_chart_url }}"
-    dest: /tmp/kyverno_policies_chart.tgz
-  when: kyverno_policies_state == 'present'
-
-- name: Deploy kyverno-policies helm chart
-  kubernetes.core.helm:
-    release_state: "{{kyverno_policies_state}}"
-    release_name: kyverno-policies
-    release_namespace: "{{ kyverno_policies_namespace }}"
-    create_namespace: false
-    chart_ref: /tmp/kyverno_policies_chart.tgz
-    force: true
-    values_files:
-      - /tmp/kyverno_policies_values.yaml
+- block:
+  - name: Remove kyverno_policies helm chart
+    shell: helm -n "{{ kyverno_namespace }}" uninstall kyverno-policies
+    args:
+      chdir: /tmp
   run_once: true
+  when: kyverno_policies_state == 'absent'
 
-## We use shell helm as the kubernetes.core.helm module will not upgrade in most case
-#- name: Deploy kyverno_policies helm chart
-#  shell: helm -n "{{ kyverno_policies_namespace }}" upgrade -i kyverno_policies --values /tmp/kyverno_policies_values "{{ kyverno_policies_helm_chart_url }}"
-#  args:
-#    chdir: /tmp
+#- name: Deploy kyverno-policies helm chart
+#  kubernetes.core.helm:
+#    release_state: "{{kyverno_policies_state}}"
+#    release_name: kyverno-policies
+#    release_namespace: "{{ kyverno_policies_namespace }}"
+#    create_namespace: false
+#    chart_ref: /tmp/kyverno_policies_chart.tgz
+#    force: true
+#    values_files:
+#      - /tmp/kyverno_policies_values.yaml
 #  run_once: true
-#  when: kyverno_policies_state == 'present'
+#

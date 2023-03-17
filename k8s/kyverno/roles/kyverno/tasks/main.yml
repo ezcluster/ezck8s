@@ -18,74 +18,78 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create kyverno namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ kyverno_namespace }}"
+- block:
+  - name: Create kyverno namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ kyverno_namespace }}"
+
+  - name: Copy preset file
+    template:
+      src: kyverno-preset.yaml.j2
+      dest: /tmp/kyverno-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/kyverno-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/kyverno_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the kyverno chart
+    ansible.builtin.get_url:
+      url: "{{ kyverno_helm_chart_url }}"
+      dest: /tmp/kyverno_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy kyverno helm chart
+    shell: helm -n "{{ kyverno_namespace }}" upgrade -i kyverno --values /tmp/kyverno_values.yaml /tmp/kyverno_chart.tgz
+    args:
+      chdir: /tmp
+
+  #- name: Deploy kyverno helm chart
+  #  kubernetes.core.helm:
+  #    release_state: "{{kyverno_state}}"
+  #    release_name: kyverno
+  #    release_namespace: "{{ kyverno_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: /tmp/kyverno_chart.tgz
+  #    values_files:
+  #      - /tmp/kyverno_values.yaml
+
+  run_once: true
   when: kyverno_state == 'present'
 
-- name: Copy preset file
-  template:
-    src: kyverno-preset.yaml.j2
-    dest: /tmp/kyverno-preset.yaml
-  run_once: true
 
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/kyverno-preset.yaml"
-  run_once: true
-
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/kyverno_values.yaml
-  run_once: true
-  when: kyverno_state == 'present'
-
-# From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
-# The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
-# So, we first download the chart localy
-
-- name: Fetch the kyverno chart
-  ansible.builtin.get_url:
-    url: "{{ kyverno_helm_chart_url }}"
-    dest: /tmp/kyverno_chart.tgz
-  when: kyverno_state == 'present'
-
-- name: Deploy kyverno helm chart
-  kubernetes.core.helm:
-    release_state: "{{kyverno_state}}"
-    release_name: kyverno
-    release_namespace: "{{ kyverno_namespace }}"
-    create_namespace: false
-    chart_ref: /tmp/kyverno_chart.tgz
-    force: true
-    values_files:
-      - /tmp/kyverno_values.yaml
-  run_once: true
-
-## We use shell helm as the kubernetes.core.helm module will not upgrade in most case
-#- name: Deploy kyverno helm chart
-#  shell: helm -n "{{ kyverno_namespace }}" upgrade -i kyverno --values /tmp/kyverno_values "{{ kyverno_helm_chart_url }}"
-#  args:
-#    chdir: /tmp
-#  run_once: true
-#  when: kyverno_state == 'present'
 
 # --------------------------------- Cleanup
 
-- name: Remove kyverno namespace
-  k8s:
-    state: absent
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ kyverno_namespace }}"
+- block:
+  - name: Remove kyverno helm chart
+    shell: helm -n "{{ kyverno_namespace }}" uninstall kyverno
+    args:
+      chdir: /tmp
+    run_once: true
+
+  - name: Remove kyverno namespace
+    k8s:
+      state: absent
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ kyverno_namespace }}"
+  run_once: true
   when: kyverno_state == 'absent'
 

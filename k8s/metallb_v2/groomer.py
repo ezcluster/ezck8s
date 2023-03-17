@@ -32,7 +32,8 @@ REPO_ID="repo_id"
 DATA = "data"
 LOCAL_DNS = "local_dns"
 RELAX_PSP = "relax_psp"
-
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
 
 def resolveDnsAndCheckWithLocal(model, addr):
     if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
@@ -48,6 +49,8 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][METALLB][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[DATA], K8S, {})
+        setDefaultInMap(model[DATA][K8S], METALLB, {})
         setDefaultInMap(model[CLUSTER][K8S][METALLB], RELAX_PSP, False)
         setDefaultInMap(model[CLUSTER][K8S][METALLB], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][METALLB][OFFLINE], IMAGE_PREFIX, "")
@@ -70,4 +73,7 @@ def groom(_plugin, model):
                 dashboardInRange = True
         if DASHBOARD_IP in model[CLUSTER][K8S][METALLB] and not dashboardInRange:
             ERROR("metallb.dashboard_ip is not included in one of metallb.external_ip_ranges")
+        image_prefix = model[CLUSTER][K8S][METALLB][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][METALLB][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
         return True

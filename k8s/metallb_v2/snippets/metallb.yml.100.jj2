@@ -14,8 +14,8 @@
 {%% if  m.cluster.k8s.metallb.dashboard_ip is defined %%}
     metallb_dashboard_ip: {{{  m.cluster.k8s.metallb.dashboard_ip  }}}
 {%% endif %%}
-{%% if  m.data.repositories.metallb.dockerconfigjson is defined %%}
-    metallb_dockerconfigjson: {{{  m.data.repositories.metallb.dockerconfigjson  }}}
+{%% if  m.data.k8s.metallb.dockerconfigjson is defined %%}
+    metallb_dockerconfigjson: {{{  m.data.k8s.metallb.dockerconfigjson  }}}
 {%% endif %%}
   roles:
   - { role: "metallb_v2" }

@@ -18,55 +18,79 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create argocd namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ argocd_namespace }}"
+- block:
+  - name: Create argocd namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ argocd_namespace }}"
+
+  - name: Copy preset file
+    template:
+      src: argocd-preset.yaml.j2
+      dest: /tmp/argocd-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/argocd-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/argocd_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the argocd chart
+    ansible.builtin.get_url:
+      url: "{{ argocd_helm_chart_url }}"
+      dest: /tmp/argocd_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy argocd helm chart
+    shell: helm -n "{{ argocd_namespace }}" upgrade -i argocd --values /tmp/argocd_values.yaml /tmp/argocd_chart.tgz
+    args:
+      chdir: /tmp
+
+  #- name: Deploy argocd helm chart
+  #  kubernetes.core.helm:
+  #    release_state: "{{argocd_state}}"
+  #    release_name: argocd
+  #    release_namespace: "{{ argocd_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: "{{ argocd_helm_chart_url }}"
+  #    force: true
+  #    values_files:
+  #      - /tmp/argocd_values.yaml
+
+
+  run_once: true
   when: argocd_state == 'present'
 
-- name: Copy preset file
-  template:
-    src: argocd-preset.yaml.j2
-    dest: /tmp/argocd-preset.yaml
-  run_once: true
-
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/argocd-preset.yaml"
-  run_once: true
-
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/argocd_values.yaml
-  run_once: true
-  when: argocd_state == 'present'
-
-- name: Deploy argocd helm chart
-  kubernetes.core.helm:
-    release_state: "{{argocd_state}}"
-    release_name: argocd
-    release_namespace: "{{ argocd_namespace }}"
-    create_namespace: false
-    chart_ref: "{{ argocd_helm_chart_url }}"
-    force: true
-    values_files:
-      - /tmp/argocd_values.yaml
-  run_once: true
 
 # --------------------------------- Cleanup
 
-- name: Remove argocd namespace
-  k8s:
-    state: absent
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ argocd_namespace }}"
+- block:
+
+  - name: Remove argocd helm chart
+    shell: helm -n "{{ argocd_namespace }}" uninstall argocd
+    args:
+      chdir: /tmp
+
+  - name: Remove argocd namespace
+    k8s:
+      state: absent
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ argocd_namespace }}"
+
+  run_once: true
   when: argocd_state == 'absent'

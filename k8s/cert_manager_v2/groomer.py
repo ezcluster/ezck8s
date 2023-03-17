@@ -28,8 +28,10 @@ DATA = "data"
 NAME = "name"
 ID = "id"
 CLUSTER_ISSUERS = "cluster_issuers"
-OFFLINE = "offline"
-IMAGE_PREFIX = "image_prefix"
+OFFLINE="offline"
+IMAGE_PREFIX="image_prefix"
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+DOCKERCONFIGJSON = "dockerconfigjson"
 REPO_ID = "repo_id"
 
 
@@ -50,10 +52,11 @@ def groom(_plugin, model):
     if model[CLUSTER][K8S][CERT_MANAGER][DISABLED]:
         return False
     else:
+        setDefaultInMap(model[DATA], K8S, {})
+        setDefaultInMap(model[DATA][K8S], CERT_MANAGER, {})
         setDefaultInMap(model[CLUSTER][K8S][CERT_MANAGER], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][CERT_MANAGER][OFFLINE], IMAGE_PREFIX, "")
         lookupRepository(model, None, "cert_manager", model[CLUSTER][K8S][CERT_MANAGER][REPO_ID])
-
         model[DATA][CLUSTER_ISSUERS] = []
         if CLUSTER_ISSUERS in model[CLUSTER][K8S][CERT_MANAGER]:
             for issuerDef in model[CLUSTER][K8S][CERT_MANAGER][CLUSTER_ISSUERS]:
@@ -62,4 +65,7 @@ def groom(_plugin, model):
                 issuer = model[DATA][CERT_MANAGER_ISSUER_BY_ID][issuerDef[ID]]
                 issuer[NAME] = issuerDef[NAME]
                 model[DATA][CLUSTER_ISSUERS].append(issuer)
+        image_prefix = model[CLUSTER][K8S][CERT_MANAGER][OFFLINE][IMAGE_PREFIX]
+        if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
+            model[DATA][K8S][CERT_MANAGER][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
         return True

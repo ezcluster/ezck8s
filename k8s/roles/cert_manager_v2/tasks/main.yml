@@ -19,52 +19,66 @@
 
 # ----------------------------------------- Deployment
 
-- name: Create cert-manager namespace
-  k8s:
-    state: present
-    definition:
-      api_version: v1
-      kind: Namespace
-      metadata:
-        name: "{{ cert_manager_namespace }}"
+- block:
+  - name: Create cert-manager namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ cert_manager_namespace }}"
+
+  - name: Copy preset file
+    template:
+      src: cert-manager-preset.yaml.j2
+      dest: /tmp/cert-manager-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/cert-manager-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/cert_manager_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the cert-manager chart
+    ansible.builtin.get_url:
+      url: "{{ cert_manager_helm_chart_url }}"
+      dest: /tmp/cert_manager_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy cert-manager helm chart
+    shell: helm -n "{{ cert_manager_namespace }}" upgrade -i cert-manager --values /tmp/cert_manager_values.yaml /tmp/cert_manager_chart.tgz
+    args:
+      chdir: /tmp
+    run_once: true
+
+  #
+  #- name: Deploy cert-manager helm chart
+  #  kubernetes.core.helm:
+  #    release_name: cert-manager
+  #    release_namespace: "{{ cert_manager_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: /tmp/cert_manager_chart.tgz
+  #    values_files:
+  #      - /tmp/cert_manager_values.yaml
+
+  # NB There is a hook in the chart (startupapicheck) which wait for cert-manager to be up and ready
+
+  - name: Copy cluster_issuers
+    template:
+      src: cluster_issuers.yaml.j2
+      dest: /tmp/cluster_issuers.yaml
+
+  - name: Install cluster_issuers
+    k8s:
+      state: present
+      src: "/tmp/cluster_issuers.yaml"
   run_once: true
-
-- name: Copy preset file
-  template:
-    src: cert-manager-preset.yaml.j2
-    dest: /tmp/cert-manager-preset.yaml
-  run_once: true
-
-- name: Apply preset file
-  k8s:
-    state: present
-    src: "/tmp/cert-manager-preset.yaml"
-  run_once: true
-
-- name: Setup value file
-  template:
-    src: "values.yaml.j2"
-    dest: /tmp/cert_manager_values.yaml
-  run_once: true
-
-
-- name: Deploy cert-manager helm chart
-  kubernetes.core.helm:
-    release_name: cert-manager
-    release_namespace: "{{ cert_manager_namespace }}"
-    chart_ref: "{{ cert_manager_helm_chart_url }}"
-    values_files:
-      - /tmp/cert_manager_values.yaml
-  run_once: true
-
-# NB There is a hook in the chart (startupapicheck) which wait for cert-manager to be up and ready
-
-- name: Copy cluster_issuers
-  template:
-    src: cluster_issuers.yaml.j2
-    dest: /tmp/cluster_issuers.yaml
-
-- name: Install cluster_issuers
-  k8s:
-    state: present
-    src: "/tmp/cluster_issuers.yaml"

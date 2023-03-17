@@ -5,13 +5,9 @@
     kyverno_state: present
     kyverno_namespace: {{{ m.cluster.k8s.kyverno.namespace }}}
     kyverno_helm_chart_url: {{{ m.data.repositories.kyverno.helm_chart_url }}}
-    kyverno_policies_helm_chart_url: {{{ m.data.repositories.kyverno.policies_helm_chart_url }}}
-    kyverno_policies_helm_values:
-      {{{ m.cluster.k8s.kyverno.policiesHelmValues | to_pretty_yaml | indent(6) }}}
     kyverno_image_prefix: "{{{ m.cluster.k8s.kyverno.offline.image_prefix }}}"
 {%% if  m.data.k8s.kyverno.dockerconfigjson is defined %%}
     kyverno_dockerconfigjson: {{{  m.data.k8s.kyverno.dockerconfigjson }}}
 {%% endif %%}
   roles:
   - kyverno
-  - kyverno-policies
