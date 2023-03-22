@@ -1,0 +1,9 @@
+
+
+# kubectl -n topolvm-system patch deployment topolvm-controller --patch-file ./patch.yaml
+
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: image-pull

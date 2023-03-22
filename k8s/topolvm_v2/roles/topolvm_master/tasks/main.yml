@@ -1,0 +1,155 @@
+# Copyright (C) 2022 BROADSoftware
+#
+# This file is part of EzCluster
+#
+# EzCluster is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# EzCluster is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
+
+
+# ------------------------------------------------------ Preparation
+
+- name: Protect system namespaces from TopoLVM webhook
+  shell: "{{topolvm_kubectl}} label --overwrite ns kube-system topolvm.io/webhook=ignore"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not labeled') == -1
+  when: topolvm_state == 'present'
+
+- name: Unprotect system namespaces from TopoLVM webhook
+  shell: "{{topolvm_kubectl}} label --overwrite ns kube-system topolvm.io/webhook-"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not found') == -1
+  when: topolvm_state == 'absent'
+
+
+- name: Add a label on topolvm nodes to select them for daemonset
+  shell: "{{topolvm_kubectl}} label nodes {{item}} --overwrite topology.topolvm.io=true"
+  with_items: "{{groups['_topolvm_']}}"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not labeled') == -1
+  when: topolvm_state == 'present'
+
+- name: Remove label on topolvm nodes to select them for daemonset
+  shell: "{{topolvm_kubectl}} label nodes {{item}} --overwrite topology.topolvm.io.com-"
+  with_items: "{{groups['_topolvm_']}}"
+  register: result
+  run_once: true
+  changed_when: result.stdout_lines[0].find('not found') == -1
+  when: topolvm_state == 'absent'
+
+# ----------------------------------------- Deployment
+
+- block:
+  - name: Create topolvm namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ topolvm_namespace }}"
+          labels:
+            topolvm.io/webhook: ignore
+
+  - name: Copy preset file
+    template:
+      src: topolvm-preset.yaml.j2
+      dest: /tmp/topolvm-preset.yaml
+
+  - name: Apply preset file
+    k8s:
+      state: present
+      src: "/tmp/topolvm-preset.yaml"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/topolvm_values.yaml
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the topolvm chart
+    ansible.builtin.get_url:
+      url: "{{ topolvm_helm_chart_url }}"
+      dest: /tmp/topolvm_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy topolvm helm chart
+    shell: helm -n "{{ topolvm_namespace }}" upgrade -i topolvm --values /tmp/topolvm_values.yaml /tmp/topolvm_chart.tgz
+    args:
+      chdir: /tmp
+    run_once: true
+
+  #- name: Deploy topolvm helm chart
+  #  kubernetes.core.helm:
+  #    release_state: "{{topolvm_state}}"
+  #    release_name: topolvm
+  #    release_namespace: "{{ topolvm_namespace }}"
+  #    create_namespace: false
+  #    chart_ref: "{{ topolvm_helm_chart_url }}"
+  #    force: true
+  #    values_files:
+  #      - /tmp/topolvm_values.yaml
+  #  run_once: true
+  run_once: true
+  when: topolvm_state == 'present'
+
+
+
+# ---- Patch imagePullSecret in deployment
+
+- name: Add immagePullSecret to deployment and daemonset
+  block:
+
+  - name: Copy patch file
+    template:
+      src: patch-image-pull.yaml.j2
+      dest: /tmp/patch-image-pull.yaml
+
+  - name: Add immagePullSecret to controller deployment
+    shell: "{{topolvm_kubectl}} -n {{ topolvm_namespace }} patch deployment topolvm-controller  --patch-file /tmp/patch-image-pull.yaml"
+
+  - name: Add immagePullSecret to node daemonset
+    shell: "{{topolvm_kubectl}} -n {{ topolvm_namespace }} patch daemonset topolvm-node  --patch-file /tmp/patch-image-pull.yaml"
+
+  - name: Add immagePullSecret to scheduler daemonset
+    shell: "{{topolvm_kubectl}} -n {{ topolvm_namespace }} patch daemonset topolvm-scheduler  --patch-file /tmp/patch-image-pull.yaml"
+
+  when: topolvm_state == 'present' and topolvm_dockerconfigjson is defined and topolvm_dockerconfigjson
+  run_once: true
+
+# --------------------------------- Cleanup
+
+- block:
+
+  - name: Remove topolvm helm chart
+    shell: helm -n "{{ topolvm_namespace }}" uninstall topolvm
+    args:
+      chdir: /tmp
+
+  - name: Remove topolvm namespace
+    k8s:
+      state: absent
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ topolvm_namespace }}"
+
+  run_once: true
+  when: topolvm_state == 'absent'
+

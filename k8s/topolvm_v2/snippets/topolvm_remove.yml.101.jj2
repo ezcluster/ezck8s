@@ -1,0 +1,24 @@
+
+- hosts: kube_control_plane
+  tags: [ "topolvm", "topolvm_master", "addons" ]
+  vars:
+    topolvm_state: absent
+  roles:
+  - topolvm_scheduler
+
+- hosts: kube_control_plane
+  tags: [ "topolvm", "topolvm_master" ]
+  vars:
+    topolvm_state: absent  
+{%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
+    topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
+{%% endif %%}
+  roles:
+  - topolvm_master  
+  
+
+- hosts: _topolvm_
+  tags: [ "topolvm", "topolvm_lvmd" ]
+  roles:
+  - topolvm_lvmd_absent
+  
