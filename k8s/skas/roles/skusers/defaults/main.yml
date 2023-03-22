@@ -21,7 +21,7 @@ skas_users_state: present
 skas_namespace: skas-system
 
 skas_users_helm_release: skuser
-skas_users_helm_chart_url: https://github.com/skasproject/warehouse/releases/download/0.1.0/skusers-0.1.0.tgz
+skas_users_helm_chart_url: https://github.com/skasproject/warehouse/releases/download/0.2.0/skusers-0.2.0.tgz
 
 
 

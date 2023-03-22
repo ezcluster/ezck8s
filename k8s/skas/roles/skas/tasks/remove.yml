@@ -31,7 +31,6 @@
       state: started
       timeout: 300
       delay: 15
-
   when: skas_configure_apiserver
 
 - name: Remove skas working folder
@@ -40,22 +39,26 @@
     path: /etc/kubernetes/skas
 
 
-
 # ----------------------------------------- Helm chart removal
 -
 - name: Helm chart uninstall
   block:
+
   - name: Remove skas helm chart
-    kubernetes.core.helm:
-      release_state: absent
-      release_name: "{{ skas_helm_release }}"
-      release_namespace: "{{ skas_namespace}}"
-      create_namespace: false
-      chart_ref: "{{ skas_helm_chart_url }}"
-      values_files:
-        - /tmp/skas_values.yaml
+    shell: helm -n "{{ skas_namespace }}" uninstall {{ skas_helm_release }}
+    args:
+      chdir: /tmp
     run_once: true
 
+#  - name: Remove skas helm chart
+#    kubernetes.core.helm:
+#      release_state: absent
+#      release_name: "{{ skas_helm_release }}"
+#      release_namespace: "{{ skas_namespace}}"
+#      create_namespace: false
+#      chart_ref: "{{ skas_helm_chart_url }}"
+#      values_files:
+#        - /tmp/skas_values.yaml
 
   - name: Remove skas namespace
     k8s:
@@ -65,5 +68,5 @@
         kind: Namespace
         metadata:
           name: "{{ skas_namespace }}"
-    run_once: true
+  run_once: true
   when: skas_deploy_helm_chart
