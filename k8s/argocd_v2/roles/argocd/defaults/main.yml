@@ -29,3 +29,10 @@ argocd_cluster_issuer:
 
 argocd_ingress_nginx_host:
 
+argocd_replicas:
+  controller: 1
+  server: 1
+  repo_server: 1
+  application_set: 1
+
+

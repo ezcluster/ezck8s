@@ -28,6 +28,7 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
+          "controller_replica_count": { type: int, required: true }
           "external_ip": { type: str, required: False }
           "http_node_port": { type: int, required: False }
           "https_node_port": { type: int, required: False }

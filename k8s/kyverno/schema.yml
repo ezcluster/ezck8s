@@ -30,6 +30,7 @@ mapping:
           "repo_id": { type: str, required: true }
           "namespace": { type: str, required: false }         # Default: kiverno
           "policiesHelmValues": { type: any, required: false }    # Default: ""
+          "replicaCount": { type: int, required: true, enum: [1, 3] }
           "offline":
             type: map
             required: false

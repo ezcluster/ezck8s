@@ -3,7 +3,11 @@
 crds:
   install: {{ argocd_install_crds }}
 
+controller:
+  replicas: {{ argocd_replicas.controller }}
+
 server:
+  replicas: {{ argocd_replicas.server }}
 {% if argocd_ingress_nginx_host is defined and argocd_ingress_nginx_host %}
   ingress:
     enabled: true
@@ -23,6 +27,12 @@ server:
   ingress:
     enabled: false
 {% endif %}
+
+repoServer:
+  replicas: {{ argocd_replicas.repo_server }}
+
+applicationSet:
+  replicaCount: {{ argocd_replicas.application_set }}
 
 global:
   image:

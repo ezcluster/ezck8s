@@ -19,6 +19,8 @@ kyverno_state: present
 
 kyverno_namespace: kyverno
 
+kyverno_replica_count: 1
+
 #kyverno_helm_chart_url: https://kyverno.github.io/kyverno/kyverno-2.7.1.tgz
 
 # kyverno_dockerconfigjson:

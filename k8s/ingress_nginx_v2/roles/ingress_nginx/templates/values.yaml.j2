@@ -3,6 +3,7 @@ podSecurityPolicy:
     enabled: true
 
 controller:
+  replicaCount: {{ ingress_nginx_controller_replica_count }}
   service:
     enabled: true
     annotations:

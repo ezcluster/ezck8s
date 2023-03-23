@@ -6,6 +6,7 @@
     kyverno_namespace: {{{ m.cluster.k8s.kyverno.namespace }}}
     kyverno_helm_chart_url: {{{ m.data.repositories.kyverno.helm_chart_url }}}
     kyverno_image_prefix: "{{{ m.cluster.k8s.kyverno.offline.image_prefix }}}"
+    kyverno_replica_count: {{{ m.cluster.k8s.kyverno.replicaCount }}}
 {%% if  m.data.k8s.kyverno.dockerconfigjson is defined %%}
     kyverno_dockerconfigjson: {{{  m.data.k8s.kyverno.dockerconfigjson }}}
 {%% endif %%}

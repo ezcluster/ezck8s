@@ -20,6 +20,8 @@ cert_manager_namespace: cert-manager
 
 cert_manager_helm_chart_url: https://charts.jetstack.io/charts/cert-manager-v1.11.0.tgz
 
+cert_manager_replica_count: 1
+
 cert_manager_image_prefix: ""
 
 cert_manager_dockerconfigjson: Null

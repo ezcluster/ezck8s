@@ -26,6 +26,7 @@ ingress_nginx_command_line_arguments: []
 
 ingress_nginx_dockerconfigjson: Null
 
+ingress_nginx_controller_replica_count: 1
 
 #ingress_nginx_external_ip: "192.168.33.22"
 

@@ -24,3 +24,6 @@
 {%% if  m.data.k8s.ingress_nginx.dockerconfigjson is defined  %%}
     ingress_nginx_dockerconfigjson: {{{ m.data.k8s.ingress_nginx.dockerconfigjson }}}
 {%% endif %%}
+    ingress_nginx_controller_replica_count: {{{ m.cluster.k8s.ingress_nginx.controller_replica_count }}}
+
+

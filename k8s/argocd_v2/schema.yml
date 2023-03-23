@@ -28,6 +28,14 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
+          "replicas":
+            type: map
+            required: true
+            mapping:
+              "controller": { type: int, required: true }
+              "server": { type: int, required: true }
+              "repo_server": { type: int, required: true }
+              "application_set": { type: int, required: true }
           "ingress_nginx_host": { type: str, required: False }    # Create an ingress for ingress-nginx-controller
           "cluster_issuer": { type: str, required: False }        # Cert-manager cluster-issuer to certify our TLS connection
           "offline":

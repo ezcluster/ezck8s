@@ -2,6 +2,8 @@
 
 installCRDs: true
 
+replicaCount: {{ cert_manager_replica_count }}
+
 {% if cert_manager_image_prefix is defined and cert_manager_image_prefix %}
 
 image:

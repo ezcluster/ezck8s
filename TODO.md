@@ -1,12 +1,9 @@
 
 ## ALL
 
-- Disable swap
-- kspray5: increase worker disk
-- kyverno in HA
-- Lookup all plugin for controller replication
-
 ## kyverno:
+
+Setup on control plane instead of worker ?
 
 ## cert_manager:
 

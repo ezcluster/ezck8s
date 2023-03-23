@@ -14,3 +14,4 @@
 {%% if  m.data.k8s.argocd.dockerconfigjson is defined %%}
     argocd_dockerconfigjson: {{{  m.data.k8s.argocd.dockerconfigjson  }}}
 {%% endif %%}
+    argocd_replicas: {{{ m.cluster.k8s.argocd.replicas }}}

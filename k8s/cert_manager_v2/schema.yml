@@ -28,6 +28,7 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
+          "replica_count": { type: int, required: true }
           "cluster_issuers":
             type: seq
             required: false
