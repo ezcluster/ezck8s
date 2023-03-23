@@ -13,6 +13,9 @@ image:
     - name: image-pull
 {% endif %}
 
+initImage:
+  repository: {{ kyverno_image_prefix }}ghcr.io/kyverno/kyvernopre
+
 cleanupController:
   image:
     repository: {{ kyverno_image_prefix }}ghcr.io/kyverno/cleanup-controller
