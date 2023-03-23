@@ -33,7 +33,7 @@ crio_download_url: "{{files_repository}}/storage-googleapis-com/cri-o/artifacts/
 helm_download_url: "{{files_repository}}/get-helm-sh/helm-{{ helm_version }}-linux-{{ image_arch }}.tar.gz"
 runc_download_url: "{{files_repository}}/github-com/opencontainers/runc/releases/download/{{ runc_version }}/runc.{{ image_arch }}"
 crun_download_url: "{{files_repository}}/github-com/containers/crun/releases/download/{{ crun_version }}/crun-{{ crun_version }}-linux-{{ image_arch }}"
-youki_download_url: "{{files_repository}}/github-com/containers/youki/releases/download/v{{ youki_version }}/youki_v{{ youki_version | regex_replace('\.', '_') }}_linux.tar.gz"
+youki_download_url: "{{files_repository}}/github-com/containers/youki/releases/download/v{{ youki_version }}/youki_v{{ youki_version | regex_replace('\\.', '_') }}_linux.tar.gz"
 kata_containers_download_url: "{{files_repository}}/github-com/kata-containers/kata-containers/releases/download/{{ kata_containers_version }}/kata-static-{{ kata_containers_version }}-{{ ansible_architecture }}.tar.xz"
 gvisor_runsc_download_url: "{{files_repository}}/storage-googleapis-com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/runsc"
 gvisor_containerd_shim_runsc_download_url: "{{files_repository}}/storage-googleapis-com/gvisor/releases/release/{{ gvisor_version }}/{{ ansible_architecture }}/containerd-shim-runsc-v1"
