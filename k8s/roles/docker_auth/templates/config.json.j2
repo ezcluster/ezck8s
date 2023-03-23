@@ -1,0 +1,12 @@
+{
+    "auths": {
+        {% for auth in docker_auth_auths %}
+        "{{ auth.registry }}": {
+            "auth": "{{ (auth.username + ':' + auth.password) | b64encode }}"
+        }
+        {% endfor %}
+    }
+}
+
+
+

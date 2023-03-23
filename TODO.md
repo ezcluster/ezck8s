@@ -1,9 +1,10 @@
 
 ## ALL
 
-- Retest from scratch
-- Test on multi-node cluster (HA kyverno)
-- Test air gap
+- Disable swap
+- kspray5: increase worker disk
+- kyverno in HA
+- Lookup all plugin for controller replication
 
 ## kyverno:
 
@@ -14,8 +15,6 @@
 ## ingress_nginx:
 
 ## topolvm:
-
-- Update version 
 
 ## argocd:
 
