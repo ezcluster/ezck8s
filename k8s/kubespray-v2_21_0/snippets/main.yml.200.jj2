@@ -5,6 +5,19 @@
   - { role: register_ca, register_ca_urls: [ "{{{m.data.httpProxies.docker.proxy_ca_url}}}" ] }  
 {%% endif %%}
 
+
+{%% if m.cluster.k8s.kubespray.offline.containerd_registry_auth is defined %%}
+- hosts: all
+  tags: ["docker_auth", "nerdctl_auth"]
+  vars:
+    docker_auth_user_home: /root
+    docker_auth_user: root
+    docker_auth_auths: {{{m.cluster.k8s.kubespray.offline.containerd_registry_auth}}}
+  roles:
+    - docker_auth
+{%% endif %%}
+
+
 - import_playbook: {{{ m.data.helpers.kubespray.folder }}}/cluster.yml
 
 {%% if 'docker_certificates' in m.data and m.data.docker_certificates|length > 0 %%}
