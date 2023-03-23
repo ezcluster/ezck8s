@@ -35,3 +35,8 @@ global:
 redis:
   image:
     repository: {{ argocd_image_prefix }}public.ecr.aws/docker/library/redis
+
+dex:
+  image:
+    repository: {{ argocd_image_prefix }}ghcr.io/dexidp/dex
+
