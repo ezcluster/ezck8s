@@ -1,4 +1,6 @@
 
 - name: Install kyverno
   import_playbook: kyverno.yml
-     
+
+- name: Install kyverno default cluster-wide policies
+  import_playbook: kyverno-policies.yml
