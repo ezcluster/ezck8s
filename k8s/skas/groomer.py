@@ -44,7 +44,7 @@ def groom(_plugin, model):
         return False
     else:
         lookupRepository(model, None, "skas", model[CLUSTER][K8S][SKAS][REPO_ID])
-        setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_WEBHOOK_URL, "https://skas-auth.skas-system.svc:7014/v1/tokenReview")
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_WEBHOOK_URL, "https://skas-auth.skas-system.svc/v1/tokenReview")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_CERT_NAME, "skas-auth-cert")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE_NAME, "skas")

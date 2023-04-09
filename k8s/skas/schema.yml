@@ -28,7 +28,7 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
-          authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc:7014/v1/tokenReview
+          authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc/v1/tokenReview
           authCertName: { type: str, required: false }      # Default skas-auth-cert
           namespace: { type: str, required: false }         # Default: skas-system
           helmReleaseName: { type: str, required: false }       # Default: skas
