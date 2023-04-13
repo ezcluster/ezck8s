@@ -1,1 +1,44 @@
+
+
+# Escape DELETE operationon all policies
+policyPreconditions:
+  # Baseline
+  disallow-capabilities:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-host-namespaces:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-host-path:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-host-ports:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-host-process:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-privileged-containers:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-proc-mount:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-selinux:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  restrict-apparmor-profiles:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  restrict-seccomp:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  restrict-sysctls:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  # Other
+  require-non-root-groups:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  # Restricted
+  disallow-capabilities-strict:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  disallow-privilege-escalation:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  require-run-as-non-root-user:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  require-run-as-nonroot:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  restrict-seccomp-strict:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
+  restrict-volume-types:
+    any: [ { "key": "{{'{{'}} request.operation {{'}}'}}", "operator": "NotEquals", "value": "DELETE" }]
 {{ kyverno_policies_helm_values | to_nice_yaml }}

@@ -13,6 +13,9 @@
 {%% if m.data.repositories.topolvm.helm_chart_url is defined %%}
     topolvm_helm_chart_url: {{{ m.data.repositories.topolvm.helm_chart_url }}}
 {%% endif %%}
+{%% if  m.cluster.k8s.topolvm.kyverno_namespace is defined %%}
+    topolvm_kyverno_namespace: {{{  m.cluster.k8s.topolvm.kyverno_namespace  }}}
+{%% endif %%}
   roles:
   - topolvm_master  
   

@@ -14,5 +14,38 @@ data:
 
 
 
-      
+{% if ingress_nginx_kyverno_namespace is defined %}
+---
+apiVersion: kyverno.io/v2alpha1
+kind: PolicyException
+metadata:
+  name: ingress-nginx-controller
+  namespace: {{ ingress_nginx_kyverno_namespace}}
+spec:
+  exceptions:
+    - policyName: require-run-as-nonroot
+      ruleNames:
+        - run-as-non-root
+        - autogen-run-as-non-root
+    - policyName: disallow-privilege-escalation
+      ruleNames:
+        - privilege-escalation
+        - autogen-privilege-escalation
+    - policyName: restrict-seccomp-strict
+      ruleNames:
+        - check-seccomp-strict
+        - autogen-check-seccomp-strict
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - Deployment
+          namespaces:
+            - {{ ingress_nginx_namespace }}
+          names:
+            - ingress-nginx-controller*
+
+{% endif %}
+
       

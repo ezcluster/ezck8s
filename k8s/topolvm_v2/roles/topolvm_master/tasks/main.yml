@@ -141,6 +141,17 @@
     args:
       chdir: /tmp
 
+  # We need this, as preset contains PoliciyException, which are NOT in our namespace (So will remains if not removed explicitly)
+  - name: Copy preset file for removal
+    template:
+      src: topolvm-preset.yaml.j2
+      dest: /tmp/topolvm-preset.yaml
+
+  - name: Remove preset file
+    k8s:
+      state: absent
+      src: "/tmp/topolvm-preset.yaml"
+
   - name: Remove topolvm namespace
     k8s:
       state: absent

@@ -30,7 +30,8 @@ mapping:
           "repo_id": { type: str, required: true }
           "relax_psp": { type: bool, required: false }    # Default to false
           "controller_replica_count": { type: int, required: false } # Default to 2
-          "device_classes": 
+          "kyverno_namespace": { type: str, required: false }
+          "device_classes":
             type: seq
             required: true
             sequence:

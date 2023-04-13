@@ -17,6 +17,9 @@
 {%% if  m.data.k8s.metallb.dockerconfigjson is defined %%}
     metallb_dockerconfigjson: {{{  m.data.k8s.metallb.dockerconfigjson  }}}
 {%% endif %%}
+{%% if  m.cluster.k8s.metallb.kyverno_namespace is defined %%}
+    metallb_kyverno_namespace: {{{  m.cluster.k8s.metallb.kyverno_namespace  }}}
+{%% endif %%}
   roles:
   - { role: "metallb_v2" }
       

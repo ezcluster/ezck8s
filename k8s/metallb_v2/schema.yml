@@ -38,6 +38,7 @@ mapping:
           "repo_id": { type: str, required: true }
           "dashboard_ip": { type: str, required: false }
           "relax_psp": { type: bool, required: false }    # Default to false
+          "kyverno_namespace": { type: str, required: false }
           "offline":
             type: map
             required: false

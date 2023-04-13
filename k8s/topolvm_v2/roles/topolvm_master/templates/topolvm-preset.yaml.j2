@@ -31,5 +31,97 @@ data:
 
 
 
-      
-      
+
+{% if topolvm_kyverno_namespace is defined %}
+---
+apiVersion: kyverno.io/v2alpha1
+kind: PolicyException
+metadata:
+  name: topolvm-daemonsets
+  namespace: {{ topolvm_kyverno_namespace}}
+spec:
+  exceptions:
+    - policyName: disallow-capabilities-strict
+      ruleNames:
+        - require-drop-all
+        - autogen-require-drop-all
+        #- adding-capabilities-strict
+        #- autogen-adding-capabilities-strict
+    - policyName: disallow-privilege-escalation
+      ruleNames:
+        - privilege-escalation
+        - autogen-privilege-escalation
+    - policyName: disallow-privileged-containers
+      ruleNames:
+        - privileged-containers
+        - autogen-privileged-containers
+    - policyName: require-run-as-nonroot
+      ruleNames:
+        - run-as-non-root
+        - autogen-run-as-non-root
+    - policyName: restrict-seccomp-strict
+      ruleNames:
+        - check-seccomp-strict
+        - autogen-check-seccomp-strict
+    - policyName: restrict-volume-types
+      ruleNames:
+        - restricted-volumes
+        - autogen-restricted-volumes
+    - policyName: disallow-host-path
+      ruleNames:
+        - host-path
+        - autogen-host-path
+    - policyName: disallow-host-namespaces
+      ruleNames:
+        - host-namespaces
+        - autogen-host-namespaces
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - DaemonSet
+          namespaces:
+            - {{ topolvm_namespace }}
+          names:
+            - topolvm-node*
+            - topolvm-scheduler*
+
+---
+apiVersion: kyverno.io/v2alpha1
+kind: PolicyException
+metadata:
+  name: topolvm-controller
+  namespace: {{ topolvm_kyverno_namespace}}
+spec:
+  exceptions:
+    - policyName: disallow-capabilities-strict
+      ruleNames:
+        - require-drop-all
+        - autogen-require-drop-all
+        #- adding-capabilities-strict
+        #- autogen-adding-capabilities-strict
+    - policyName: disallow-privilege-escalation
+      ruleNames:
+        - privilege-escalation
+        - autogen-privilege-escalation
+    - policyName: require-run-as-nonroot
+      ruleNames:
+        - run-as-non-root
+        - autogen-run-as-non-root
+    - policyName: restrict-seccomp-strict
+      ruleNames:
+        - check-seccomp-strict
+        - autogen-check-seccomp-strict
+  match:
+    any:
+      - resources:
+          kinds:
+            - Pod
+            - Deployment
+          namespaces:
+            - {{ topolvm_namespace }}
+          names:
+            - topolvm-controller*
+
+{% endif %}

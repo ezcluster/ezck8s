@@ -62,10 +62,15 @@
     when: ansible_os_family == "RedHat"
   - name: Install k8s ansible module required package (Debian)
     block:
+      # We may need to retry, as some remaining lock
       - name: Install python3-pip with apt
         ansible.builtin.apt:
           name: python3-pip
           state: present
+        register: result
+        retries: 50
+        delay: 20
+        until: result is not failed
       - name: Pip install k8s required modules
         ansible.builtin.pip:
           name:
@@ -79,7 +84,6 @@
           extra_args: "--proxy {{{ m.cluster.k8s.kubespray.offline.pip_proxy }}}"
 {%% endif %%}
     when: ansible_os_family == "Debian"
-
 
 
 - hosts:  kube_control_plane[0]

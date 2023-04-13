@@ -24,6 +24,11 @@
     topolvm_dockerconfigjson: {{{  m.data.k8s.topolvm.dockerconfigjson  }}}
 {%% endif %%}
     topolvm_relax_psp: {{{  m.cluster.k8s.topolvm.relax_psp  }}}
+{%% if  m.cluster.k8s.topolvm.kyverno_namespace is defined %%}
+    topolvm_kyverno_namespace: {{{  m.cluster.k8s.topolvm.kyverno_namespace  }}}
+{%% endif %%}
+
+
   roles:
   - topolvm_master  
   

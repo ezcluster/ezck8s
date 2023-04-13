@@ -33,6 +33,7 @@ mapping:
           "http_node_port": { type: int, required: False }
           "https_node_port": { type: int, required: False }
           "dashboard_host": { type: str, required: False }
+          "kyverno_namespace": { type: str, required: false }
           "command_line_arguments":
             type: any
           "offline":

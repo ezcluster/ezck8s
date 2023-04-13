@@ -10,6 +10,7 @@ controller:
       metallb.universe.tf/loadBalancerIPs: {{ingress_nginx_external_ip}}
       metallb.universe.tf/allow-shared-ip: "ingress"
 
+
 {% if ingress_nginx_command_line_arguments is defined %}
   extraArgs: {{ ingress_nginx_command_line_arguments }}
 {% endif %}
@@ -22,9 +23,30 @@ controller:
 
   opentelemetry:
     image: {{ ingress_nginx_image_prefix }}registry.k8s.io/ingress-nginx/opentelemetry:v20230107-helm-chart-4.4.2-2-g96b3d2165@sha256:331b9bebd6acfcd2d3048abbdd86555f5be76b7e3d0b5af4300b04235c6056c9
+{% endif %}
 
   admissionWebhooks:
+    createSecretJob:
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - "ALL"
     patch:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 2000
+        fsGroup: 2000
+        seccompProfile:
+          type: RuntimeDefault
+
+    patchWebhookJob:
+      securityContext:
+        capabilities:
+          drop:
+            - "ALL"
+
+{% if ingress_nginx_image_prefix is defined and ingress_nginx_image_prefix %}
       image:
         repository: {{ ingress_nginx_image_prefix }}registry.k8s.io/ingress-nginx/kube-webhook-certgen
         digest: Null
