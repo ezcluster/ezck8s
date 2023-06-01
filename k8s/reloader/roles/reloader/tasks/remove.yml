@@ -1,0 +1,21 @@
+# ----------------------------------------- Helm chart removal
+-
+- name: Helm chart uninstall
+  block:
+
+  - name: Remove reloader helm chart
+    shell: helm -n "{{ reloader_namespace }}" uninstall {{ reloader_helm_release }}
+    args:
+      chdir: /tmp
+    run_once: true
+
+
+  - name: Remove reloader namespace
+    k8s:
+      state: absent
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ reloader_namespace }}"
+  run_once: true

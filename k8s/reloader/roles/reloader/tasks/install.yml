@@ -1,0 +1,39 @@
+
+# ----------------------------------------- Deployment
+
+- name: Helm chart deployment
+  block:
+  - name: Create reloader namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ reloader_namespace }}"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/reloader_values.yaml
+
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the reloader chart
+    ansible.builtin.get_url:
+      url: "{{ reloader_helm_chart_url }}"
+      dest: /tmp/reloader_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy reloader helm chart
+    shell: helm -n "{{ reloader_namespace }}" upgrade -i {{ reloader_helm_release }} --values /tmp/reloader_values.yaml /tmp/reloader_chart.tgz
+    args:
+      chdir: /tmp
+
+  run_once: true
+
+
+
