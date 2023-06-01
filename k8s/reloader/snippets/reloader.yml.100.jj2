@@ -2,7 +2,7 @@
 - hosts: kube_control_plane
   tags: [ "reloader" ]
   vars:
-    reloade_state: present
+    reloader_state: present
     reloader_namespace: {{{ m.cluster.k8s.reloader.namespace }}}
     reloader_helm_chart_url: {{{ m.data.repositories.reloader.helm_chart_url }}}
   roles:

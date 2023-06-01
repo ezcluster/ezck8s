@@ -1,0 +1,17 @@
+# secret_generator values
+
+# Otherwise, we got secret-generator-secret-generator
+fullnameOverride: secret-generator
+
+podSecurityContext:
+  fsGroup: 2000
+  seccompProfile:
+    type: RuntimeDefault  # ?
+securityContext:
+  allowPrivilegeEscalation: false   # ?
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000

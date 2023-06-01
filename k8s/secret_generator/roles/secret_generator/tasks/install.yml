@@ -1,0 +1,39 @@
+
+# ----------------------------------------- Deployment
+
+- name: Helm chart deployment
+  block:
+  - name: Create secret_generator namespace
+    k8s:
+      state: present
+      definition:
+        api_version: v1
+        kind: Namespace
+        metadata:
+          name: "{{ secret_generator_namespace }}"
+
+  - name: Setup value file
+    template:
+      src: "values.yaml.j2"
+      dest: /tmp/secret_generator_values.yaml
+
+
+  # From https://docs.ansible.com/ansible/latest/collections/kubernetes/core/helm_module.html
+  # The default idempotency check can fail to report changes when release_state is set to present and chart_repo_url is defined. Install helm diff >= 3.4.1 for better results.
+  # So, we first download the chart localy
+
+  - name: Fetch the secret_generator chart
+    ansible.builtin.get_url:
+      url: "{{ secret_generator_helm_chart_url }}"
+      dest: /tmp/secret_generator_chart.tgz
+
+  # We use shell helm as the kubernetes.core.helm module will not upgrade in most case
+  - name: Deploy secret_generator helm chart
+    shell: helm -n "{{ secret_generator_namespace }}" upgrade -i {{ secret_generator_helm_release }} --values /tmp/secret_generator_values.yaml /tmp/secret_generator_chart.tgz
+    args:
+      chdir: /tmp
+
+  run_once: true
+
+
+

@@ -31,3 +31,14 @@ existingImagePullSecrets:
   - image-pull
 {% endif %}
 
+# Conflicting with the webhooks config below. Aim is to also exclude kube-system
+excludeKyvernoNamespace: false
+config:
+  webhooks:
+    - namespaceSelector:
+        matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values:
+            - kube-system
+            - kyverno

@@ -1,4 +1,4 @@
-# Copyright (C) 2020 BROADSoftware
+# Copyright (C) 2023 BROADSoftware
 #
 # This file is part of EzCluster
 #
@@ -15,27 +15,12 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with EzCluster.  If not, see <http://www.gnu.org/licenses/lgpl-3.0.html>.
 
-import os
-from misc import setDefaultInMap,lookupRepository
 
-
-CLUSTER = "cluster"
-DATA = "data"
-K8S = "k8s"
-DISABLED = "disabled"
-RELOADER = "reloader"
-REPO_ID = "repo_id"
-NAMESPACE = "namespace"
-
-
-def groom(_plugin, model):
-    setDefaultInMap(model[CLUSTER], K8S, {})
-    setDefaultInMap(model[CLUSTER][K8S], RELOADER, {})
-    setDefaultInMap(model[CLUSTER][K8S][RELOADER], DISABLED, False)
-
-    if model[CLUSTER][K8S][RELOADER][DISABLED]:
-        return False
-    else:
-        lookupRepository(model, None, "reloader", model[CLUSTER][K8S][RELOADER][REPO_ID])
-        setDefaultInMap(model[CLUSTER][K8S][RELOADER], NAMESPACE, "kube-tools")
-        return True
+- include_tasks: install.yml
+  when: secret_generator_state == 'present'
+  
+- include_tasks: remove.yml
+  when: secret_generator_state == 'absent'
+  
+  
+  

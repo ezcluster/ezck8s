@@ -3,19 +3,19 @@
 - name: Helm chart uninstall
   block:
 
-  - name: Remove reloader helm chart
-    shell: helm -n "{{ reloader_namespace }}" uninstall {{ reloader_helm_release }}
+  - name: Remove secret_generator helm chart
+    shell: helm -n "{{ secret_generator_namespace }}" uninstall {{ secret_generator_helm_release }}
     args:
       chdir: /tmp
     run_once: true
 
-
-#  - name: Remove reloader namespace
+#
+#  - name: Remove secret_generator namespace
 #    k8s:
 #      state: absent
 #      definition:
 #        api_version: v1
 #        kind: Namespace
 #        metadata:
-#          name: "{{ reloader_namespace }}"
+#          name: "{{ secret_generator_namespace }}"
   run_once: true

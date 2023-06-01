@@ -23,19 +23,19 @@ CLUSTER = "cluster"
 DATA = "data"
 K8S = "k8s"
 DISABLED = "disabled"
-RELOADER = "reloader"
+SECRET_GENERATOR = "secret_generator"
 REPO_ID = "repo_id"
 NAMESPACE = "namespace"
 
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
-    setDefaultInMap(model[CLUSTER][K8S], RELOADER, {})
-    setDefaultInMap(model[CLUSTER][K8S][RELOADER], DISABLED, False)
+    setDefaultInMap(model[CLUSTER][K8S], SECRET_GENERATOR, {})
+    setDefaultInMap(model[CLUSTER][K8S][SECRET_GENERATOR], DISABLED, False)
 
-    if model[CLUSTER][K8S][RELOADER][DISABLED]:
+    if model[CLUSTER][K8S][SECRET_GENERATOR][DISABLED]:
         return False
     else:
-        lookupRepository(model, None, "reloader", model[CLUSTER][K8S][RELOADER][REPO_ID])
-        setDefaultInMap(model[CLUSTER][K8S][RELOADER], NAMESPACE, "kube-tools")
+        lookupRepository(model, None, "secret_generator", model[CLUSTER][K8S][SECRET_GENERATOR][REPO_ID])
+        setDefaultInMap(model[CLUSTER][K8S][SECRET_GENERATOR], NAMESPACE, "kube-tools")
         return True
