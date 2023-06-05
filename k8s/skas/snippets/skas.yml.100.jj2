@@ -10,8 +10,19 @@
     skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
     skas_helm_release: {{{ m.cluster.k8s.skas.helmReleaseName }}}
     skas_helm_chart_url: {{{ m.data.repositories.skas.helm_chart_url }}}
-
+{%% if m.cluster.k8s.skas.clusterIssuer is defined %%}
+    skas_clusterIssuer: {{{ m.cluster.k8s.skas.clusterIssuer }}}
+{%% endif %%}
+{%% if m.cluster.k8s.skas.ingress_nginx_host is defined %%}
+    skas_ingress_nginx_host: {{{ m.cluster.k8s.skas.ingress_nginx_host }}}
+{%% endif %%}
+{%% if m.cluster.k8s.skas.kubeconfig is defined %%}
+    skas_context: {{{ m.cluster.k8s.skas.kubeconfig.context }}}
+    skas_api_server_url: {{{ m.cluster.k8s.skas.kubeconfig.apiServerUrl }}}
+{%% endif %%}
+{%% if m.cluster.k8s.skas.helmValues is defined %%}
     skas_helm_values:
       {{{ m.cluster.k8s.skas.helmValues | to_pretty_yaml | indent(6) }}}
+{%% endif %%}
   roles:
     - skas

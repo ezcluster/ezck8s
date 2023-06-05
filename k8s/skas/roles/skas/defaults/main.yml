@@ -28,5 +28,5 @@ skas_helm_release: skas
 skas_helm_chart_url: https://github.com/skasproject/warehouse/releases/download/0.2.0/skas-0.2.0.tgz
 
 
-skas_helm_values:  # Values data for helm chart
+#skas_helm_values:  # Values data for helm chart
 

@@ -31,8 +31,16 @@ mapping:
           authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc/v1/tokenReview
           authCertName: { type: str, required: false }      # Default skas-auth-cert
           namespace: { type: str, required: false }         # Default: skas-system
-          helmReleaseName: { type: str, required: false }       # Default: skas
-          helmValues: { type: any, required: true }
+          helmReleaseName: { type: str, required: false }   # Default: skas
+          helmValues: { type: any, required: false }        # Default: ""
           usersHelmReleaseName: { type: str, required: false }   # Default: skusers
           usersHelmValues: { type: any, required: false }    # Default: ""
+          ingress_nginx_host: { type: str, required: false }
+          clusterIssuer: { type: str, required: false }
+          kubeconfig:
+            type: map
+            required: false
+            mapping:
+              context: { type: str, required: true }
+              apiServerUrl: { type: str, required: true }
 

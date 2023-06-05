@@ -48,6 +48,7 @@ def groom(_plugin, model):
         setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_CERT_NAME, "skas-auth-cert")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE_NAME, "skas")
+        #setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_VALUES, {})
         setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE_name, "skusers")
-        setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, "")
+        #setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, {})
         return True
