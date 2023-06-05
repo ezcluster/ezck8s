@@ -118,3 +118,24 @@
   #- debug: var=result
   when: ingress_nginx_dashboard_host is defined
   run_once: true
+
+
+- block:
+  # ------------------------------------- Kubernetes api server manifest
+  - name: Generate the kubernetes manifest
+    template:
+      src: kubernetes.yaml.j2
+      dest: "/tmp/ingress_nginx_kubernetes.yaml"
+
+  # We must retry, waiting for the webhook to be ready
+  - name: Apply the kubernetes manifest (May wait for the nginx Webhook ready)
+    k8s:
+      state: present
+      src:  "/tmp/ingress_nginx_kubernetes.yaml"
+    retries: 2   # NB: May take long time to load controller image
+    delay: 5
+    register: result
+    until: not result.failed
+  #- debug: var=result
+  when: ingress_nginx_kubernetes_host is defined
+  run_once: true

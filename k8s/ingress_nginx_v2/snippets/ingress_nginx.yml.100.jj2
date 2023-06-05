@@ -28,5 +28,8 @@
 {%% if m.cluster.k8s.ingress_nginx.kyverno_namespace is defined %%}
     ingress_nginx_kyverno_namespace: {{{ m.cluster.k8s.ingress_nginx.kyverno_namespace }}}
 {%% endif %%}
+{%% if m.cluster.k8s.ingress_nginx.kubernetes_host is defined %%}
+    ingress_nginx_kubernetes_host: {{{ m.cluster.k8s.ingress_nginx.kubernetes_host }}}
+{%% endif %%}
 
 

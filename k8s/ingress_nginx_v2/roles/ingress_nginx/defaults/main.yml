@@ -32,5 +32,6 @@ ingress_nginx_controller_replica_count: 1
 
 #ingress_nginx_enable_ssl_passthrough: True
 
-#ingress_nginx_dashboard_host: dashboard.kspray11
+#ingress_nginx_dashboard_host: dashboard.ingress.my.cluster.com
 
+#ingress_nginx_kubernetes_host: kubernetes.ingress.my.cluster.com
