@@ -35,7 +35,16 @@ IMAGE_PREFIX = "image_prefix"
 REPO_ID = "repo_id"
 PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
 DOCKERCONFIGJSON = "dockerconfigjson"
-
+KARGO = "kargo"
+ENABLED = "enabled"
+APPLICATION_SET = "application_set"
+SKAS = "skas"
+DEX_IMAGE_TAG = "dex_image_tag"
+DEX_IMAGEPULLPOLICY = "dex_imagePullPolicy"
+DEX_SKAS_CA_ID = "dex_skas_ca_id"
+CA_DATA_BY_ID = "caDataById"
+DEX_SKAS_CA_DATA = "dexSkasCaData"
+DEX_SKAS_URL = "dex_skas_url"
 
 def resolveDnsAndCheckWithLocal(model, addr):
     if LOCAL_DNS in model[DATA] and addr in model[DATA][LOCAL_DNS]:
@@ -61,6 +70,17 @@ def groom(_plugin, model):
         setDefaultInMap(model[DATA][K8S], ARGOCD, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD], OFFLINE, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][OFFLINE], IMAGE_PREFIX, "")
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD], SKAS, {})
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGE_TAG, "v2.35.3-skas-0.2.0")
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGEPULLPOLICY, "IfNotPresent")
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_SKAS_URL, "https://skas-auth.skas-system.svc")
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD], KARGO, {})
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][KARGO], ENABLED, False)
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD], APPLICATION_SET, {})
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][APPLICATION_SET], ENABLED, False)
+
         lookupRepository(model, None, "argocd", model[CLUSTER][K8S][ARGOCD][REPO_ID])
 
         if LOAD_BALANCER_IP in model[CLUSTER][K8S][ARGOCD]:
@@ -78,5 +98,11 @@ def groom(_plugin, model):
         image_prefix = model[CLUSTER][K8S][ARGOCD][OFFLINE][IMAGE_PREFIX]
         if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
             model[DATA][K8S][ARGOCD][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
+
+        if DEX_SKAS_CA_ID in model[CLUSTER][K8S][ARGOCD][SKAS]:
+            id = model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_ID]
+            if id not in model[DATA][CA_DATA_BY_ID]:
+                ERROR("k8s.argocd.skas: dex_ca_id '{}' undefined".format(id))
+            model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_DATA] = model[DATA][CA_DATA_BY_ID][id]
 
         return True

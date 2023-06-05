@@ -35,4 +35,8 @@ argocd_replicas:
   repo_server: 1
   application_set: 1
 
+argocd_skas:
+  enabled: false
 
+argocd_kargo:
+  enabled: false

@@ -30,8 +30,38 @@ server:
 
 repoServer:
   replicas: {{ argocd_replicas.repo_server }}
+{% if argocd_kargo.enabled %}
+  extraContainers:
+    - name: kargo
+      command: [/var/run/argocd/argocd-cmp-server] # Entrypoint should be Argo CD lightweight CMP server i.e. argocd-cmp-server
+      imagePullPolicy: Always
+      image: {{ argocd_image_prefix }}ghcr.io/kubedp/kargo:0.1.0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 999
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - "ALL"
+        seccompProfile:
+          type: RuntimeDefault
+      volumeMounts:
+        - mountPath: /var/run/argocd
+          name: var-files
+        - mountPath: /home/argocd/cmp-server/plugins
+          name: plugins
+        # Starting with v2.4, do NOT mount the same tmp volume as the repo-server container. The filesystem separation helps
+        # mitigate path traversal attacks.
+        - mountPath: /tmp
+          name: cmp-tmp
+  volumes:
+    - emptyDir: {}
+      name: cmp-tmp
+{% endif %}
+
 
 applicationSet:
+  enabled: {{ argocd_application_set.enabled }}
   replicaCount: {{ argocd_replicas.application_set }}
 
 global:
@@ -48,5 +78,32 @@ redis:
 
 dex:
   image:
+{% if argocd_skas.enabled %}
+    repository: {{ argocd_image_prefix }}ghcr.io/skasproject/dex
+    tag: {{ argocd_skas.dex_image_tag }}
+    imagePullPolicy: {{ argocd_skas.dex_imagePullPolicy }}
+{% else %}
     repository: {{ argocd_image_prefix }}ghcr.io/dexidp/dex
+{% endif %}
 
+configs:
+{% if argocd_skas.enabled %}
+  cm:
+    admin.enabled: false
+    url: https://{{ argocd_ingress_nginx_host }}
+    dex.config: |
+      connectors:
+      - type: skas
+        id: skas
+        name: SKAS
+        config:
+          loginPrompt: "User:"
+          loginProvider:
+            url: {{ argocd_skas.dex_skas_url }}
+{% if argocd_skas.dexSkasCaData is defined %}
+            rootCaData: {{ argocd_skas.dexSkasCaData }}
+{% endif %}
+{% endif %}
+  rbac:
+    policy.csv: |
+      g, argocd-admin, role:admin

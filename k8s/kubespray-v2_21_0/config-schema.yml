@@ -61,6 +61,14 @@ mapping:
         mapping:
           "image_prefix": { type: str, required: True }
           "dockerconfigjson": { type: str, required: True }
+  "CAs":
+    type: seq
+    required: false
+    sequence:
+      - type: map
+        mapping:
+          "id": { type: str, required: True }
+          "data": { type: str, required: True }
 
             
             

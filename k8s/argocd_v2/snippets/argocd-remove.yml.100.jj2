@@ -1,0 +1,6 @@
+
+- hosts: kube_control_plane[0]:rancher[0]
+  tags: [ "argocd", "argoc_cd", "argo-cd", "addons" ]
+  roles:
+  - role: "argocd"
+    argocd_state: absent

@@ -43,5 +43,23 @@ mapping:
             required: false
             mapping:
               "image_prefix": { type: str, required: false }
+          skas:
+            type: map
+            required: false
+            mapping:
+              "enabled": { type: bool, required: true }
+              "dex_image_tag": { type: str, required: false} # Default to "v2.35.3-skas-0.2.0"
+              "dex_imagePullPolicy": { type: str, required: false} # Default to "IfNotPresent"
+              "dex_skas_url": { type: str, required: false } # Default to https://skas-auth.skas-system.svc
+              "dex_skas_ca_id": { type: str, required: false }
+          kargo:
+            type: map
+            required: false
+            mapping:
+              "enabled": { type: bool, required: true }
+          application_set:
+            type: map
+            required: false
+            mapping:
+              "enabled": { type: bool, required: true }
 
-                

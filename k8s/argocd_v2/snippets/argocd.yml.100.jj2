@@ -3,6 +3,7 @@
   tags: [ "argocd", "argoc_cd", "argo-cd", "addons" ]
   roles:
   - role: "argocd"
+    argocd_state: present
 {%% if m.cluster.k8s.argocd.ingress_nginx_host is defined %%}
     argocd_ingress_nginx_host: "{{{ m.cluster.k8s.argocd.ingress_nginx_host }}}"
 {%% endif %%}
@@ -15,3 +16,16 @@
     argocd_dockerconfigjson: {{{  m.data.k8s.argocd.dockerconfigjson  }}}
 {%% endif %%}
     argocd_replicas: {{{ m.cluster.k8s.argocd.replicas }}}
+
+    argocd_skas:
+      enabled: {{{ m.cluster.k8s.argocd.skas.enabled }}}
+      dex_image_tag: {{{ m.cluster.k8s.argocd.skas.dex_image_tag }}}
+      dex_imagePullPolicy: {{{ m.cluster.k8s.argocd.skas.dex_imagePullPolicy }}}
+      dex_skas_url: {{{ m.cluster.k8s.argocd.skas.dex_skas_url }}}
+{%% if m.cluster.k8s.argocd.skas.dexSkasCaData is defined %%}
+      dexSkasCaData: {{{ m.cluster.k8s.argocd.skas.dexSkasCaData }}}
+{%% endif %%}
+    argocd_kargo:
+      enabled: {{{ m.cluster.k8s.argocd.kargo.enabled }}}
+    argocd_application_set:
+      enabled: {{{ m.cluster.k8s.argocd.application_set.enabled }}}
