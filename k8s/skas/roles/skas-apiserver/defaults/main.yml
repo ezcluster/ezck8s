@@ -18,10 +18,8 @@
 
 skas_state: present   # present or absent
 
-skas_deploy_helm_chart: true
-skas_configure_apiserver: true
 
-skas_auth_webhook_url: https://sk-auth.skas-system.svc:7014/v1/tokenReview
+skas_auth_webhook_url:  https://skas-auth.skas-system.svc/v1/tokenReview
 skas_auth_cert_name: skas-auth-cert
 skas_namespace: skas-system
 skas_helm_release: skas

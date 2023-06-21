@@ -25,4 +25,5 @@
       {{{ m.cluster.k8s.skas.helmValues | to_pretty_yaml | indent(6) }}}
 {%% endif %%}
   roles:
-    - skas
+    - skas-chart
+    - skas-apiserver
