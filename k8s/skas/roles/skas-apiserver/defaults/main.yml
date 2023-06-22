@@ -18,12 +18,9 @@
 
 skas_state: present   # present or absent
 
-
 skas_auth_webhook_url:  https://skas-auth.skas-system.svc/v1/tokenReview
 skas_auth_cert_name: skas-auth-cert
 skas_namespace: skas-system
-skas_helm_release: skas
-skas_helm_chart_url: https://github.com/skasproject/warehouse/releases/download/0.2.0/skas-0.2.0.tgz
 
 
 #skas_helm_values:  # Values data for helm chart
