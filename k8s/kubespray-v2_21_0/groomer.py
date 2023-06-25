@@ -77,8 +77,9 @@ def groom(_plugin, model):
         model[DATA]["dnsNbrDots"] = model[CLUSTER][K8S][KUBESPRAY][DNS_DOMAIN].count(".") + 1
 
         model[DATA][K8S][PULL_SECRET_BY_PREFIX] = {}
-        for x in model[CONFIG][PULL_SECRET_BY_PREFIX]:
-            model[DATA][K8S][PULL_SECRET_BY_PREFIX][x[IMAGE_PREFIX]] = x[DOCKERCONFIGJSON]
+        if PULL_SECRET_BY_PREFIX in model[CONFIG]:
+            for x in model[CONFIG][PULL_SECRET_BY_PREFIX]:
+                model[DATA][K8S][PULL_SECRET_BY_PREFIX][x[IMAGE_PREFIX]] = x[DOCKERCONFIGJSON]
 
         model[DATA][CA_DATA_BY_ID] = {}
         if CAs in model[CONFIG]:
