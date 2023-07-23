@@ -1,5 +1,5 @@
 {% if skas_helm_values is defined %}
-{{ skas_helm_values | to_nice_yaml }}
+{{ skas_helm_values | to_nice_yaml(indent=2) }}
 {% else %}
 {}
 {% endif %}
