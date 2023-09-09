@@ -27,6 +27,7 @@ DISABLED = "disabled"
 EXTERNAL_IP = "external_ip"
 ENABLE_SSL_PASSTHROUGH = "enable_ssl_passthrough"
 DASHBOARD_HOST = "dashboard_host"
+KUBERNETES_HOST = "kubernetes_host"
 COMMAND_LINE_ARGUMENTS = "command_line_arguments"
 OFFLINE = "offline"
 IMAGE_PREFIX = "image_prefix"
@@ -65,6 +66,12 @@ def groom(_plugin, model):
 
         lookupRepository(model, None, "ingress_nginx", model[CLUSTER][K8S][INGRESS_NGINX][REPO_ID])
 
+        enableSslPassthrough = False
+        if COMMAND_LINE_ARGUMENTS in model[CLUSTER][K8S][INGRESS_NGINX]:
+            for cla in model[CLUSTER][K8S][INGRESS_NGINX][COMMAND_LINE_ARGUMENTS]:
+                if cla == "enable-ssl-passthrough":
+                    enableSslPassthrough = True
+
         if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX]:
             model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] = resolveDnsAndCheckWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP])
         if DASHBOARD_HOST in model[CLUSTER][K8S][INGRESS_NGINX]:
@@ -74,13 +81,19 @@ def groom(_plugin, model):
                     ERROR("k8s.ingress_nginx: 'external_ip' and 'dashboard_host' must resolve on same ip ({} != {})".format(model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP], dashboard_ip))
             else:
                 logger.warning("Unable to resolve '{}' for now. May be this DNS entry will be created later.".format(model[CLUSTER][K8S][INGRESS_NGINX][DASHBOARD_HOST]))
-            enableSslPassthrough = False
-            if COMMAND_LINE_ARGUMENTS in model[CLUSTER][K8S][INGRESS_NGINX]:
-                for cla in model[CLUSTER][K8S][INGRESS_NGINX][COMMAND_LINE_ARGUMENTS]:
-                    if cla == "enable-ssl-passthrough":
-                        enableSslPassthrough = True
             if not enableSslPassthrough:
                 ERROR("k8s.ingress_nginx: Dashbaord access require '--enable-ssl-passthrough' command line argument to be defined")
+
+        if KUBERNETES_HOST in model[CLUSTER][K8S][INGRESS_NGINX]:
+            kubernetes_ip = resolveDnsWithLocal(model, model[CLUSTER][K8S][INGRESS_NGINX][KUBERNETES_HOST])
+            if kubernetes_ip is not None:
+                if EXTERNAL_IP in model[CLUSTER][K8S][INGRESS_NGINX] and model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP] != kubernetes_ip:
+                    ERROR("k8s.ingress_nginx: 'external_ip' and 'kubernetes_host' must resolve on same ip ({} != {})".format(model[CLUSTER][K8S][INGRESS_NGINX][EXTERNAL_IP], kubernetes_ip))
+            else:
+                logger.warning("Unable to resolve '{}' for now. May be this DNS entry will be created later.".format(model[CLUSTER][K8S][INGRESS_NGINX][KUBERNETES_HOST]))
+            if not enableSslPassthrough:
+                ERROR("k8s.ingress_nginx: Kubernetes access require '--enable-ssl-passthrough' command line argument to be defined")
+
         image_prefix = model[CLUSTER][K8S][INGRESS_NGINX][OFFLINE][IMAGE_PREFIX]
         if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
             model[DATA][K8S][INGRESS_NGINX][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
