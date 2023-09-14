@@ -72,7 +72,7 @@ def groom(_plugin, model):
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][OFFLINE], IMAGE_PREFIX, "")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD], SKAS, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)
-        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGE_TAG, "v2.35.3-skas-0.2.0")
+        #setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGE_TAG, "v2.35.3-skas-0.2.0")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGEPULLPOLICY, "IfNotPresent")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_SKAS_URL, "https://skas-auth.skas-system.svc")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)
@@ -99,10 +99,17 @@ def groom(_plugin, model):
         if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
             model[DATA][K8S][ARGOCD][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
 
-        if DEX_SKAS_CA_ID in model[CLUSTER][K8S][ARGOCD][SKAS]:
-            id = model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_ID]
-            if id not in model[DATA][CA_DATA_BY_ID]:
-                ERROR("k8s.argocd.skas: dex_ca_id '{}' undefined".format(id))
-            model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_DATA] = model[DATA][CA_DATA_BY_ID][id]
+        if SKAS in model[CLUSTER][K8S][ARGOCD]:
+            if DEX_IMAGE_TAG not in model[CLUSTER][K8S][ARGOCD][SKAS]:
+                ERROR("Missing k8s.argocd.skas.{}".format(DEX_IMAGE_TAG))
+
+            if DEX_SKAS_CA_ID in model[CLUSTER][K8S][ARGOCD][SKAS]:
+                id = model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_ID]
+                if id not in model[DATA][CA_DATA_BY_ID]:
+                    ERROR("k8s.argocd.skas: dex_ca_id '{}' undefined".format(id))
+                model[CLUSTER][K8S][ARGOCD][SKAS][DEX_SKAS_CA_DATA] = model[DATA][CA_DATA_BY_ID][id]
+
+
+
 
         return True
