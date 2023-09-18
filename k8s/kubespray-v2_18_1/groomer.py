@@ -40,6 +40,10 @@ DASHBOARD = "dashboard"
 OFFLINE="offline"
 DNS_DOMAIN="dns_domain"
 
+PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
+CONFIG = "config"
+CA_DATA_BY_ID = "caDataById"
+CAs = "CAs"
 
 def groom(_plugin, model):
     setDefaultInMap(model[DATA], K8S, {})
@@ -90,4 +94,17 @@ def groom(_plugin, model):
                     model[DATA][DOCKER_CERTIFICATES].append(cert)
                 else:
                     ERROR("docker_certificates '{}' is not defined in configuration file!".format(certName))
+
+        model[DATA][K8S][PULL_SECRET_BY_PREFIX] = {}
+        if PULL_SECRET_BY_PREFIX in model[CONFIG]:
+            for x in model[CONFIG][PULL_SECRET_BY_PREFIX]:
+                model[DATA][K8S][PULL_SECRET_BY_PREFIX][x[IMAGE_PREFIX]] = x[DOCKERCONFIGJSON]
+
+        model[DATA][CA_DATA_BY_ID] = {}
+        if CAs in model[CONFIG]:
+            for x in model[CONFIG][CAs]:
+                model[DATA][CA_DATA_BY_ID][x[ID]] = x[DATA]
+
+
+
         return True
