@@ -12,13 +12,31 @@ tolerations:
   - key: node-role.kubernetes.io/control-plane
     operator: Equal
     effect: NoSchedule
+{% endif %}
+
+{% if skas_control_plane or skas_pod_anti_affinity%}
 affinity:
+{% endif %}
+{% if skas_control_plane %}
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
       - matchExpressions:
         - key: node-role.kubernetes.io/control-plane
           operator: Exists
+{% endif %}
+{% if skas_pod_anti_affinity%}
+  podAntiAffinity:
+    preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/instance
+                operator: In
+                values:
+                  - skas
+          topologyKey: kubernetes.io/hostname
 {% endif %}
 
 skAuth:

@@ -10,6 +10,7 @@
     skas_replica_count: {{{ m.cluster.k8s.skas.replica_count }}}
     skas_enable_login_service: {{{ m.cluster.k8s.skas.enable_login_service }}}
     skas_control_plane: {{{ m.cluster.k8s.skas.control_plane }}}
+    skas_pod_anti_affinity: {{{ m.cluster.k8s.skas.pod_anti_affinity }}}
 {%% if m.cluster.k8s.skas.cluster_issuer is defined %%}
     skas_clusterIssuer: {{{ m.cluster.k8s.skas.cluster_issuer }}}
 {%% endif %%}

@@ -40,6 +40,7 @@ mapping:
           replica_count: { type: int, required: false }
           enable_login_service: { type: bool, required: false }
           control_plane: { type: bool, required: false }
+          pod_anti_affinity: { type: bool, required: false }
           kubeconfig:
             type: map
             required: false

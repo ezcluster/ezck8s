@@ -36,6 +36,8 @@ REPO_ID = "repo_id"
 REPLICA_COUNT = "replica_count"
 ENABLE_LOGIN_SERVICE = "enable_login_service"
 CONTROL_PLANE = "control_plane"
+POD_ANTI_AFFINITY = "pod_anti_affinity"
+
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
@@ -54,4 +56,5 @@ def groom(_plugin, model):
         setDefaultInMap(model[CLUSTER][K8S][SKAS], REPLICA_COUNT, 1)
         setDefaultInMap(model[CLUSTER][K8S][SKAS], ENABLE_LOGIN_SERVICE, False)
         setDefaultInMap(model[CLUSTER][K8S][SKAS], CONTROL_PLANE, False)
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], POD_ANTI_AFFINITY, False)
         return True
