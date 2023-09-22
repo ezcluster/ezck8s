@@ -2,25 +2,30 @@
 - hosts: kube_control_plane
   tags: [ "skas" ]
   vars:
-    skas_auth_webhook_url: {{{ m.cluster.k8s.skas.authWebhookUrl }}}
-    skas_auth_cert_name: {{{ m.cluster.k8s.skas.authCertName }}}
+    skas_auth_webhook_url: {{{ m.cluster.k8s.skas.auth_webhook_url }}}
+    skas_auth_cert_name: {{{ m.cluster.k8s.skas.auth_cert_name }}}
     skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
-    skas_helm_release: {{{ m.cluster.k8s.skas.helmReleaseName }}}
+    skas_helm_release: {{{ m.cluster.k8s.skas.helm_release_name }}}
     skas_helm_chart_url: {{{ m.data.repositories.skas.helm_chart_url }}}
-{%% if m.cluster.k8s.skas.clusterIssuer is defined %%}
-    skas_clusterIssuer: {{{ m.cluster.k8s.skas.clusterIssuer }}}
+    skas_replica_count: {{{ m.cluster.k8s.skas.replica_count }}}
+    skas_enable_login_service: {{{ m.cluster.k8s.skas.enable_login_service }}}
+    skas_control_plane: {{{ m.cluster.k8s.skas.control_plane }}}
+{%% if m.cluster.k8s.skas.cluster_issuer is defined %%}
+    skas_clusterIssuer: {{{ m.cluster.k8s.skas.cluster_issuer }}}
 {%% endif %%}
 {%% if m.cluster.k8s.skas.ingress_nginx_host is defined %%}
     skas_ingress_nginx_host: {{{ m.cluster.k8s.skas.ingress_nginx_host }}}
 {%% endif %%}
 {%% if m.cluster.k8s.skas.kubeconfig is defined %%}
     skas_context: {{{ m.cluster.k8s.skas.kubeconfig.context }}}
-    skas_api_server_url: {{{ m.cluster.k8s.skas.kubeconfig.apiServerUrl }}}
+    skas_api_server_url: {{{ m.cluster.k8s.skas.kubeconfig.api_server_url }}}
 {%% endif %%}
-{%% if m.cluster.k8s.skas.helmValues is defined %%}
+{%% if m.cluster.k8s.skas.helm_values is defined %%}
     skas_helm_values:
-      {{{ m.cluster.k8s.skas.helmValues | to_pretty_yaml | indent(6) }}}
+      {{{ m.cluster.k8s.skas.helm_values | to_pretty_yaml | indent(6) }}}
 {%% endif %%}
+
   roles:
     - skas-chart
-    - skas-apiserver
+#    - skas-apiserver
+

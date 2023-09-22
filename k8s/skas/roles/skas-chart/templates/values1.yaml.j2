@@ -2,6 +2,24 @@
 clusterIssuer: {{ skas_clusterIssuer  }}
 {% endif %}
 
+replicaCount: {{ skas_replica_count }}
+
+{% if skas_control_plane %}
+tolerations:
+  - key: node-role.kubernetes.io/master
+    operator: Equal
+    effect: NoSchedule
+  - key: node-role.kubernetes.io/control-plane
+    operator: Equal
+    effect: NoSchedule
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+{% endif %}
 
 skAuth:
   exposure:
@@ -10,7 +28,12 @@ skAuth:
 {% if skas_ingress_nginx_host is defined %}
         host: {{ skas_ingress_nginx_host }}
 {% else %}
-         host:
+        host:
+{% endif %}
+{% if skas_enable_login_service %}
+      services:
+        login:
+          disabled: false
 {% endif %}
   kubeconfig:
     context:

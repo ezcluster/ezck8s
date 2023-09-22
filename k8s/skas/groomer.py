@@ -25,15 +25,17 @@ K8S = "k8s"
 SKAS = "skas"
 DISABLED = "disabled"
 
-AUTH_WEBHOOK_URL = "authWebhookUrl"
-AUTH_CERT_NAME = "authCertName"
+AUTH_WEBHOOK_URL = "auth_webhook_url"
+AUTH_CERT_NAME = "auth_cert_name"
 NAMESPACE = "namespace"
-HELM_RELEASE_NAME = "helmReleaseName"
-HELM_VALUES = "helmValues"
-USERS_HELM_RELEASE_name = "usersHelmReleaseName"
-USERS_HELM_VALUES = "usersHelmValues"
+HELM_RELEASE_NAME = "helm_release_name"
+HELM_VALUES = "helm_values"
+USERS_HELM_RELEASE_name = "users_helm_release_name"
+USERS_HELM_VALUES = "users_helm_values"
 REPO_ID = "repo_id"
-
+REPLICA_COUNT = "replica_count"
+ENABLE_LOGIN_SERVICE = "enable_login_service"
+CONTROL_PLANE = "control_plane"
 
 def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER], K8S, {})
@@ -48,7 +50,8 @@ def groom(_plugin, model):
         setDefaultInMap(model[CLUSTER][K8S][SKAS], AUTH_CERT_NAME, "skas-auth-cert")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], NAMESPACE, "skas-system")
         setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_RELEASE_NAME, "skas")
-        #setDefaultInMap(model[CLUSTER][K8S][SKAS], HELM_VALUES, {})
         setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_RELEASE_name, "skusers")
-        #setDefaultInMap(model[CLUSTER][K8S][SKAS], USERS_HELM_VALUES, {})
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], REPLICA_COUNT, 1)
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], ENABLE_LOGIN_SERVICE, False)
+        setDefaultInMap(model[CLUSTER][K8S][SKAS], CONTROL_PLANE, False)
         return True

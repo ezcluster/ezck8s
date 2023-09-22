@@ -28,19 +28,22 @@ mapping:
         mapping:
           "disabled": { type: bool, required: False }
           "repo_id": { type: str, required: true }
-          authWebhookUrl: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc/v1/tokenReview
-          authCertName: { type: str, required: false }      # Default skas-auth-cert
+          auth_webhook_url: { type: str, required: false }    # Default: https://skas-auth.skas-system.svc/v1/tokenReview
+          auth_cert_name: { type: str, required: false }      # Default skas-auth-cert
           namespace: { type: str, required: false }         # Default: skas-system
-          helmReleaseName: { type: str, required: false }   # Default: skas
-          helmValues: { type: any, required: false }        # Default: ""
-          usersHelmReleaseName: { type: str, required: false }   # Default: skusers
-          usersHelmValues: { type: any, required: false }    # Default: ""
+          helm_release_name: { type: str, required: false }   # Default: skas
+          helm_values: { type: any, required: false }        # Default: ""
+          users_helm_release_name: { type: str, required: false }   # Default: skusers
+          users_helm_values: { type: any, required: false }    # Default: ""
           ingress_nginx_host: { type: str, required: false }
-          clusterIssuer: { type: str, required: false }
+          cluster_issuer: { type: str, required: false }
+          replica_count: { type: int, required: false }
+          enable_login_service: { type: bool, required: false }
+          control_plane: { type: bool, required: false }
           kubeconfig:
             type: map
             required: false
             mapping:
               context: { type: str, required: true }
-              apiServerUrl: { type: str, required: true }
+              api_server_url: { type: str, required: true }
 

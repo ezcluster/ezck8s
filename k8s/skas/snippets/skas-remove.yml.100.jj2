@@ -3,7 +3,7 @@
   tags: [ "skas" ]
   vars:
     skas_state: absent
-    skas_helm_release: {{{ m.cluster.k8s.skas.helmReleaseName }}}
+    skas_helm_release: {{{ m.cluster.k8s.skas.helm_release_name }}}
     skas_helm_chart_url: {{{ m.data.repositories.skas.helm_chart_url}}}
     skas_namespace: {{{ m.cluster.k8s.skas.namespace }}}
 
