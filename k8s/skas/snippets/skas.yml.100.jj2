@@ -28,5 +28,5 @@
 
   roles:
     - skas-chart
-#    - skas-apiserver
+    - skas-apiserver
 
