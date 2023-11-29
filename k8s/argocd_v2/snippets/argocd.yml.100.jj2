@@ -19,12 +19,15 @@
 
     argocd_skas:
       enabled: {{{ m.cluster.k8s.argocd.skas.enabled }}}
+{%% if m.cluster.k8s.argocd.skas.enabled %%}
       dex_image_tag: {{{ m.cluster.k8s.argocd.skas.dex_image_tag }}}
       dex_imagePullPolicy: {{{ m.cluster.k8s.argocd.skas.dex_imagePullPolicy }}}
       dex_skas_url: {{{ m.cluster.k8s.argocd.skas.dex_skas_url }}}
 {%% if m.cluster.k8s.argocd.skas.dexSkasCaData is defined %%}
       dexSkasCaData: {{{ m.cluster.k8s.argocd.skas.dexSkasCaData }}}
 {%% endif %%}
+{%% endif %%}
+
     argocd_kargo:
       enabled: {{{ m.cluster.k8s.argocd.kargo.enabled }}}
     argocd_application_set:

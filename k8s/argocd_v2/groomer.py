@@ -99,7 +99,7 @@ def groom(_plugin, model):
         if image_prefix != "" and image_prefix in model[DATA][K8S][PULL_SECRET_BY_PREFIX]:
             model[DATA][K8S][ARGOCD][DOCKERCONFIGJSON] = model[DATA][K8S][PULL_SECRET_BY_PREFIX][image_prefix]
 
-        if SKAS in model[CLUSTER][K8S][ARGOCD]:
+        if SKAS in model[CLUSTER][K8S][ARGOCD] and model[CLUSTER][K8S][ARGOCD][SKAS][ENABLED]:
             if DEX_IMAGE_TAG not in model[CLUSTER][K8S][ARGOCD][SKAS]:
                 ERROR("Missing k8s.argocd.skas.{}".format(DEX_IMAGE_TAG))
 
