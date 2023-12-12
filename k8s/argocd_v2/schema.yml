@@ -52,6 +52,7 @@ mapping:
               "dex_imagePullPolicy": { type: str, required: false} # Default to "IfNotPresent"
               "dex_skas_url": { type: str, required: false } # Default to https://skas-auth.skas-system.svc
               "dex_skas_ca_id": { type: str, required: false }
+              "dex_skas_bind_password": { type: str, required: true }
           kargo:
             type: map
             required: false

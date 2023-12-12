@@ -79,7 +79,7 @@ redis:
 dex:
   image:
 {% if argocd_skas.enabled %}
-    repository: {{ argocd_image_prefix }}ghcr.io/skasproject/dex
+    repository: {{ argocd_image_prefix }}dexidp/dex
     tag: {{ argocd_skas.dex_image_tag }}
     imagePullPolicy: {{ argocd_skas.dex_imagePullPolicy }}
 {% else %}
@@ -93,16 +93,32 @@ configs:
     url: https://{{ argocd_ingress_nginx_host }}
     dex.config: |
       connectors:
-      - type: skas
-        id: skas
-        name: SKAS
-        config:
-          loginPrompt: "User:"
-          loginProvider:
-            url: {{ argocd_skas.dex_skas_url }}
+        - type: ldap
+          id: ldap
+          name: SKAS
+          config:
+            host: skas-padl.skas-system.svc:636
+            insecureNoSSL: no
 {% if argocd_skas.dexSkasCaData is defined %}
-            rootCaData: {{ argocd_skas.dexSkasCaData }}
+            rootCAData: {{ argocd_skas.dexSkasCaData }}
 {% endif %}
+            bindDN: cn=readonly,dc=system,dc=skasproject,dc=com
+            bindPW: {{ argocd_skas.dex_skas_bind_password }}
+            userSearch:
+              baseDN: ou=users,dc=skasproject,dc=com
+              filter: "(objectClass=inetOrgPerson)"
+              username: uid
+              idAttr: uid
+              emailAttr: mail
+              nameAttr: uid
+              emailSuffix: mydomain.com
+            groupSearch:
+              baseDN: ou=groups,dc=skasproject,dc=com
+              filter: "(objectClass=groupOfUniqueNames)"
+              userMatchers:
+                - userAttr: uid
+                  groupAttr: memberUid
+              nameAttr: cn
 {% endif %}
   rbac:
     policy.csv: |

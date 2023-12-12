@@ -72,7 +72,7 @@ def groom(_plugin, model):
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][OFFLINE], IMAGE_PREFIX, "")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD], SKAS, {})
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)
-        #setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGE_TAG, "v2.35.3-skas-0.2.0")
+        setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGE_TAG, "latest")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_IMAGEPULLPOLICY, "IfNotPresent")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], DEX_SKAS_URL, "https://skas-auth.skas-system.svc")
         setDefaultInMap(model[CLUSTER][K8S][ARGOCD][SKAS], ENABLED, False)

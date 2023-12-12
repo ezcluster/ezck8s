@@ -26,6 +26,7 @@
 {%% if m.cluster.k8s.argocd.skas.dexSkasCaData is defined %%}
       dexSkasCaData: {{{ m.cluster.k8s.argocd.skas.dexSkasCaData }}}
 {%% endif %%}
+      dex_skas_bind_password: {{{ m.cluster.k8s.argocd.skas.dex_skas_bind_password }}}
 {%% endif %%}
 
     argocd_kargo:
