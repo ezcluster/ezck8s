@@ -1,0 +1,10 @@
+
+- hosts: kube_control_plane
+  tags: [ "replicator" ]
+  vars:
+    replicator_state: absent
+    replicator_namespace: {{{ m.cluster.k8s.replicator.namespace }}}
+    replicator_helm_chart_url: {{{ m.data.repositories.replicator.helm_chart_url }}}
+  roles:
+    - kubernetes-replicator
+

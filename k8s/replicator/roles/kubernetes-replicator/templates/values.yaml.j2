@@ -1,0 +1,27 @@
+# Replicator values
+
+podSecurityContext:
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:  # For container
+  capabilities:
+    drop:
+    - ALL
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+livenessProbe:
+  initialDelaySeconds: 10 # Was 60
+{#  periodSeconds: 10#}
+{#  timeoutSeconds: 1#}
+{#  failureThreshold: 3#}
+{#  successThreshold: 1#}
+
+readinessProbe:
+  initialDelaySeconds: 10  # Was 60
+{#  periodSeconds: 10#}
+{#  timeoutSeconds: 1#}
+{#  failureThreshold: 3#}
+{#  successThreshold: 1#}

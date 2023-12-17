@@ -1,0 +1,21 @@
+# ----------------------------------------- Helm chart removal
+-
+- name: Helm chart uninstall
+  block:
+
+  - name: Remove replicator helm chart
+    shell: helm -n "{{ replicator_namespace }}" uninstall {{ replicator_helm_release }}
+    args:
+      chdir: /tmp
+    run_once: true
+
+
+#  - name: Remove replicator namespace
+#    k8s:
+#      state: absent
+#      definition:
+#        api_version: v1
+#        kind: Namespace
+#        metadata:
+#          name: "{{ replicator_namespace }}"
+  run_once: true

@@ -1,0 +1,4 @@
+
+- name: Install replicator
+  import_playbook: replicator.yml
+     
