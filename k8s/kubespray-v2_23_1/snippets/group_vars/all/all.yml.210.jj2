@@ -96,31 +96,31 @@ kube_controller_pod_eviction_timeout: 30s
 #kube_controller_node_monitor_grace_period: 5m
 #kube_controller_node_monitor_period: 5s
 #kube_controller_pod_eviction_timeout: 1m
-
-kube_apiserver_admission_plugins_needs_configuration: [EventRateLimit, PodSecurity]
-
-kube_apiserver_enable_admission_plugins:
-#  - EventRateLimit
-#  - AlwaysPullImages
-#  - ServiceAccount
-#  - NamespaceLifecycle
-#  - NodeRestriction
-#  - LimitRanger
-#  - ResourceQuota
-#  - MutatingAdmissionWebhook
-#  - ValidatingAdmissionWebhook
-#  - PodNodeSelector
-  - PodSecurity
-
-
-kube_pod_security_use_default: true
-kube_pod_security_default_enforce: baseline
-kube_pod_security_default_enforce_version: latest
-kube_pod_security_default_audit: restricted
-kube_pod_security_default_audit_version: latest
-kube_pod_security_default_warn: restricted
-kube_pod_security_default_warn_version: latest
-kube_pod_security_exemptions_usernames: []
-kube_pod_security_exemptions_runtime_class_names: []
-kube_pod_security_exemptions_namespaces:
-  - kube-system
+#
+#kube_apiserver_admission_plugins_needs_configuration: [EventRateLimit, PodSecurity]
+#
+#kube_apiserver_enable_admission_plugins:
+##  - EventRateLimit
+##  - AlwaysPullImages
+##  - ServiceAccount
+##  - NamespaceLifecycle
+##  - NodeRestriction
+##  - LimitRanger
+##  - ResourceQuota
+##  - MutatingAdmissionWebhook
+##  - ValidatingAdmissionWebhook
+##  - PodNodeSelector
+#  - PodSecurity
+#
+#
+#kube_pod_security_use_default: true
+#kube_pod_security_default_enforce: baseline
+#kube_pod_security_default_enforce_version: latest
+#kube_pod_security_default_audit: restricted
+#kube_pod_security_default_audit_version: latest
+#kube_pod_security_default_warn: restricted
+#kube_pod_security_default_warn_version: latest
+#kube_pod_security_exemptions_usernames: []
+#kube_pod_security_exemptions_runtime_class_names: []
+#kube_pod_security_exemptions_namespaces:
+#  - kube-system
