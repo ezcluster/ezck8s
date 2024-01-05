@@ -1,0 +1,11 @@
+
+MYDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+if [ -f "${MYDIR}/config" ]
+then
+  export KUBECONFIG="${MYDIR}/config"
+  echo "KUBECONFIG=$KUBECONFIG"
+fi
+
+PS1='[{{{m.cluster.id}}}] \h:\W \u\$ '
+
