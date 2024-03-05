@@ -38,6 +38,7 @@ REPOSITORIES = "repositories"
 DASHBOARD = "dashboard"
 OFFLINE="offline"
 DNS_DOMAIN="dns_domain"
+ETCD_METRICS="etcd_metrics"
 
 PULL_SECRET_BY_PREFIX = "pull_secret_by_prefix"
 IMAGE_PREFIX = "image_prefix"
@@ -58,6 +59,7 @@ def groom(_plugin, model):
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], OFFLINE, {})
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], POD_SECURITY_POLICIES, False)
     setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], DNS_DOMAIN, "cluster.local")
+    setDefaultInMap(model[CLUSTER][K8S][KUBESPRAY], ETCD_METRICS, False)
 
     if model[CLUSTER][K8S][KUBESPRAY][DISABLED]:
         return False

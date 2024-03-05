@@ -24,3 +24,13 @@
 ### ETCD: disable peer client cert authentication.
 # This affects ETCD_PEER_CLIENT_CERT_AUTH variable
 # etcd_peer_client_auth: true
+
+{%% if m.cluster.k8s.kubespray.etcd_metrics %%}
+etcd_metrics_port: 2381
+etcd_metrics_service_labels:
+  k8s-app: etcd
+  app.kubernetes.io/managed-by: Kubespray
+  app: kube-prometheus-stack-kube-etcd
+  release: prometheus-stack
+{%% endif %%}
+
