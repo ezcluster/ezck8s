@@ -2,6 +2,7 @@
 # Kubernetes dashboard
 # RBAC required. see docs/getting-started.md for access details.
 # dashboard_enabled: false
+dashboard_enabled: {{{ m.cluster.k8s.kubespray.dashboard }}}   # EZCLUSTER
 
 # Helm deployment
 helm_enabled: false
