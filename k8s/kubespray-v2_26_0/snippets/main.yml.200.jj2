@@ -74,9 +74,16 @@
       - name: Pip install k8s required modules
         ansible.builtin.pip:
           name:
+          name:
             - openshift==0.13.1
-            - pyyaml==5.3.1
+            - pyyaml==5.4.1
             - kubernetes==24.2.0
+           # NB: Above values are know to work with kubespray v2.26.0 / k8s v1.30.4 on ubuntu 22.04
+           # For example, kubernetes==25.3.0 will fail for next step in such context:
+           # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
+           # - openshift==0.13.1
+           # - pyyaml==5.3.1
+           # - kubernetes==24.2.0
            # NB: Above values are know to work with kubespray 2.18.1 / k8s v1.22.8 on ubuntu 20.04
            # For example, kubernetes==25.3.0 will fail for next step in such context:
            # failed: [m0] (item=m0) => {"ansible_loop_var": "item", "changed": false, "item": "m0", "msg": "Failed to get client due to openssl_md5() takes at most 1 argument (2 given)"}
